@@ -4,6 +4,9 @@ steps:
   - label: ":test_tube: SellerPilot tests and production build"
     key: verify
     timeout_in_minutes: 15
+    concurrency: 1
+    concurrency_group: sellerpilot/ci-verification
+    concurrency_method: ordered
     command: |
       set -eu
       node -e "if (Number(process.versions.node.split('.')[0]) < 22) process.exit(1)"

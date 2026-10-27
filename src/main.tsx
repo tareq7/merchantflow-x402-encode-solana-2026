@@ -4,6 +4,7 @@ import {Activity,BarChart3,ChevronRight,CloudUpload,Database,Globe,LayoutDashboa
 import {analyze,type Ad,type Stock,type Opportunity,type Market} from './domain/engine';
 import {parseAds,parseStock,toCsv} from './domain/csv';
 import {auditReports} from './domain/data-quality';
+import {normalizeAmazonAdvertisedProducts,type AmazonVatTreatment} from './domain/native-amazon';
 import {Dashboard,Radar,Campaigns,Actions,DataLab,Copilot,DetailDrawer,type ViewProps} from './views';
 import './style.css';
 
@@ -24,6 +25,7 @@ export function App(){
  const [ar,setAr]=useState(false),[page,setPage]=useState<Page>('overview'),[mobile,setMobile]=useState(false),[market,setMarket]=useState<'All'|Market>('All');
  const [ads,setAds]=useState<Ad[]>([]),[stocks,setStocks]=useState<Stock[]>([]),[source,setSource]=useState<'synthetic'|'imported'>('synthetic'),[error,setError]=useState('');
  const [selected,setSelected]=useState<Opportunity|null>(null),[staged,setStaged]=useState<Record<string,boolean>>({});
+ const [nativeNotices,setNativeNotices]=useState<string[]>([]);
  const [question,setQuestion]=useState(''),[answer,setAnswer]=useState(''),[asking,setAsking]=useState(false),[metaMode,setMetaMode]=useState(false),[token,setToken]=useState('');
  const adsInput=useRef<HTMLInputElement>(null),stockInput=useRef<HTMLInputElement>(null);
  const t=(en:string,arabic:string)=>ar?arabic:en;
@@ -33,7 +35,7 @@ export function App(){
     fetch('/demo/ads.csv').then(r=>{if(!r.ok)throw Error('Missing demo ads');return r.text();}),
     fetch('/demo/inventory.csv').then(r=>{if(!r.ok)throw Error('Missing inventory sample');return r.text();})
    ]);
-   setAds(parseAds(a));setStocks(parseStock(s));setSource('synthetic');setStaged({});setError('');
+   setAds(parseAds(a));setStocks(parseStock(s));setSource('synthetic');setStaged({});setNativeNotices([]);setError('');
   }catch(e){setError(e instanceof Error?e.message:String(e));}
  }
  useEffect(()=>{void loadDemo();},[]);
@@ -58,6 +60,18 @@ export function App(){
     setStocks(parsed);
    }
    setSource('imported');setStaged({});setError('');
+  }catch(e){setError(e instanceof Error?e.message:String(e));}
+ }
+ async function importNativeAmazon(reportFile:File|undefined,costFile:File|undefined,vat:AmazonVatTreatment){
+  try{
+   if(!reportFile||!costFile)throw Error('Both the daily Amazon Ads CSV and SKU cost CSV are required.');
+   if(reportFile.size>600000||costFile.size>600000)throw Error('CSV file exceeds 600 KB limit.');
+   const [raw,cost]=await Promise.all([reportFile.text(),costFile.text()]);
+   const converted=normalizeAmazonAdvertisedProducts(raw,cost,vat);
+   setAds(old=>source==='synthetic'?converted.ads:[...old.filter(x=>x.marketplace!=='Amazon.sa'),...converted.ads]);
+   if(source==='synthetic')setStocks([]);
+   setSource('imported');setStaged({});setNativeNotices(converted.notices);
+   setError('');
   }catch(e){setError(e instanceof Error?e.message:String(e));}
  }
  function exportApproved(){
@@ -85,7 +99,7 @@ export function App(){
  }
  const view:ViewProps={
   ar,t,report,market,quality,navigate,open:setSelected,approved,staged,toggle,exportApproved,
-  ads,stocks,source,loadDemo,upload,adsInput,stockInput,
+  ads,stocks,source,loadDemo,upload,adsInput,stockInput,importNativeAmazon,nativeNotices,
   question,setQuestion,answer,asking,metaMode,setMetaMode,token,setToken,ask
  };
  return <div className="app">

@@ -3,6 +3,7 @@ import {Activity,ArrowDownToLine,ArrowRight,ArrowUpRight,BarChart3,Check,CloudUp
 import type {Ad,Stock,Opportunity,Analysis,Market} from './domain/engine';
 import {simulateSpendChange} from './domain/simulator';
 import {auditReports,type QualityReport} from './domain/data-quality';
+import type {AmazonVatTreatment} from './domain/native-amazon';
 export type ViewProps={
  ar:boolean;t:(en:string,arabic:string)=>string;report:Analysis;market:'All'|Market;quality:QualityReport;
  navigate:(id:'overview'|'radar'|'campaigns'|'actions'|'data'|'copilot')=>void;
@@ -11,6 +12,7 @@ export type ViewProps={
  ads:Ad[];stocks:Stock[];source:string;loadDemo:()=>Promise<void>;
  upload:(f:File|undefined,kind:'ads'|'stocks')=>Promise<void>;
  adsInput:React.RefObject<HTMLInputElement|null>;stockInput:React.RefObject<HTMLInputElement|null>;
+ importNativeAmazon:(report:File|undefined,cost:File|undefined,vat:AmazonVatTreatment)=>Promise<void>;nativeNotices:string[];
  question:string;setQuestion:(v:string)=>void;answer:string;asking:boolean;
  metaMode:boolean;setMetaMode:(v:boolean)=>void;token:string;setToken:(v:string)=>void;
  ask:(q?:string)=>Promise<void>;
@@ -67,6 +69,10 @@ export function Actions(p:ViewProps){const {report,t,ar,approved,staged}=p;const
  <div className="actions-list">{report.opportunities.map(o=><article key={o.id}><div><Pill s={o.severity}/><h3>{ar?arTitle[o.kind]:o.title}</h3><small>{o.marketplace} · {o.sku} · {o.campaign}</small></div><div className="action-buttons"><button className="secondary" onClick={()=>p.open(o)}>{t('Evidence','الأدلة')}</button><button disabled={blocked} className={'approval '+(staged[o.id]?'approved':'')} onClick={()=>p.toggle(o)}>{staged[o.id]?<><Check size={16}/>{t('Staged','معتمد')}</>:t('Stage proposal','اعتماد المقترح')}</button></div></article>)}</div>
  </>;}
 export function DataLab(p:ViewProps){const {t,ads,stocks,source}=p;
+ const [nativeReport,setNativeReport]=useState<File|undefined>();
+ const [costReport,setCostReport]=useState<File|undefined>();
+ const [vatChoice,setVatChoice]=useState<''|AmazonVatTreatment>('');
+
  const quality=auditReports(ads,stocks);
  return <>
  <div className="intro"><LockKeyhole size={25}/><div><strong>{t('Your reports stay in your browser.','تبقى تقاريرك داخل متصفحك.')}</strong><p>{t('CSV imports are parsed and analyzed locally; the files are not sent to Meta or any marketplace. Exclude personal customer information.','تُحلل ملفات CSV محلياً، دون إرسالها إلى ميتا أو المتاجر. لا تستخدم معلومات العملاء.')}</p></div></div>
@@ -84,7 +90,32 @@ export function DataLab(p:ViewProps){const {t,ads,stocks,source}=p;
  </div>
  <input ref={p.adsInput} type="file" accept=".csv,text/csv" hidden onChange={e=>void p.upload(e.target.files?.[0],'ads')}/>
  <input ref={p.stockInput} type="file" accept=".csv,text/csv" hidden onChange={e=>void p.upload(e.target.files?.[0],'stocks')}/>
- <div className="panel contract"><div><h3><FileText size={19}/>{t('Canonical CSV contracts','صيغة CSV الموحدة')}</h3><p>{t('Native Amazon/Noon exports differ; normalize them to these columns. Net revenue excludes VAT.','التقارير الأصلية لأمازون ونون تتطلب توحيد أسماء الأعمدة. الإيرادات لا تشمل ضريبة القيمة المضافة.')}</p><code>date,marketplace,sku,campaign,impressions,clicks,orders,spend_sar,revenue_sar,unit_cost_sar</code><code>marketplace,sku,available_units,inbound_units,avg_daily_units,lead_time_days</code><small>{t('Current source','مصدر البيانات')}: {source}</small></div><button className="secondary" onClick={()=>void p.loadDemo()}>{t('Restore synthetic demo','استعادة البيانات التجريبية')}</button></div>
+ <section className="native-import">
+   <div className="native-head"><span className="micro">{t('AMAZON ADS · VERIFIED REPORT CONTRACT','إعلانات أمازون · صيغة معتمدة')}</span><h3>{t('Import an actual Sponsored Products report','استيراد تقرير إعلانات أمازون الفعلي')}</h3>
+   <p>{t('Supports the DAILY Advertised product report, using promoted-SKU sales and units. Upload a private cost list so estimated contribution is not invented.','يدعم تقرير المنتجات المعلن عنها يومياً مع مبيعات الوحدات المروّجة؛ أرفق تكاليف المنتجات الحقيقية.')}</p></div>
+   <div className="native-fields">
+    <label>{t('01 · Daily Amazon Sponsored Products CSV','١ · تقرير أمازون اليومي')}
+     <input type="file" accept=".csv,text/csv" onChange={e=>setNativeReport(e.target.files?.[0])}/>
+     <small>{nativeReport?.name??t('Choose daily advertised-product report','اختر التقرير اليومي')}</small>
+    </label>
+    <label>{t('02 · Your SKU unit cost CSV','٢ · ملف تكاليف المنتجات')}
+     <input type="file" accept=".csv,text/csv" onChange={e=>setCostReport(e.target.files?.[0])}/>
+     <small>{costReport?.name??'sku,unit_cost_sar'}</small>
+    </label>
+    <label>{t('03 · Sales VAT treatment (required)','٣ · معاملة ضريبة القيمة المضافة (إلزامي)')}
+     <select value={vatChoice} onChange={e=>setVatChoice(e.target.value as ''|AmazonVatTreatment)}>
+      <option value="">{t('Select — do not guess','اختر — دون افتراض')}</option>
+      <option value="sales-net-of-vat">{t('Sales already exclude VAT','المبيعات لا تشمل الضريبة')}</option>
+      <option value="sales-include-15pct-vat">{t('Sales INCLUDE Saudi VAT (15%)','المبيعات تشمل ضريبة 15٪')}</option>
+     </select>
+    </label>
+   </div>
+   <button className="primary" disabled={!nativeReport||!costReport||!vatChoice} onClick={()=>void p.importNativeAmazon(nativeReport,costReport,vatChoice as AmazonVatTreatment)}>
+    <CloudUpload size={16}/>{t('Validate and import Amazon report','التحقق واستيراد تقرير أمازون')}</button>
+   <p className="native-disclaimer">{t('Daily reports only. SAR currency only. Separate stock CSV still required. Campaign attribution and actual promoted units are not interchangeable. No private files are uploaded to the server.','تقارير يومية وبالريال فقط. يلزم ملف مخزون منفصل. المشتريات المنسوبة والوحدات المروّجة ليست متطابقة. الملفات لا تغادر المتصفح.')}</p>
+   {p.nativeNotices.length>0&&<div className="native-notices">{p.nativeNotices.map((notice,i)=><p key={i}><Check size={13}/>{notice}</p>)}</div>}
+  </section>
+  <div className="panel contract"><div><h3><FileText size={19}/>{t('Canonical CSV contracts','صيغة CSV الموحدة')}</h3><p>{t('Native Amazon/Noon exports differ; normalize them to these columns. Net revenue excludes VAT.','التقارير الأصلية لأمازون ونون تتطلب توحيد أسماء الأعمدة. الإيرادات لا تشمل ضريبة القيمة المضافة.')}</p><code>date,marketplace,sku,campaign,impressions,clicks,orders,spend_sar,revenue_sar,unit_cost_sar</code><code>marketplace,sku,available_units,inbound_units,avg_daily_units,lead_time_days</code><small>{t('Current source','مصدر البيانات')}: {source}</small></div><button className="secondary" onClick={()=>void p.loadDemo()}>{t('Restore synthetic demo','استعادة البيانات التجريبية')}</button></div>
  <div className="panel disclosures"><h3><TriangleAlert size={19}/>{t('Financial and data assumptions','افتراضات مالية وبيانات')}</h3>{p.report.warnings.map((warning,i)=><p key={i}>{warning}</p>)}</div>
  </>;}
 export function Copilot(p:ViewProps){const {t,ar,question,setQuestion,asking,answer,metaMode,setMetaMode,token,setToken,ask}=p;return <>

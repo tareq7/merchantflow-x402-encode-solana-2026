@@ -49,3 +49,16 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;ma
 .quality-item strong{display:block;font-size:11px}.quality-item p{font-size:10px;line-height:1.6;margin:5px 0 0;color:#7e8581}
 @media(max-width:570px){.quality-heading{align-items:flex-start}.quality-heading h3{font-size:15px}.quality-score{padding:9px}.quality-score strong{font-size:22px}.quality-foot{gap:12px;flex-wrap:wrap}}
 .quality-blocked{display:flex;align-items:center;gap:11px;background:#fff1ed;color:#9e4f43;border:1px solid #f1ccc5;padding:14px 16px;border-radius:10px;font-size:12px;margin:0 0 18px}
+.native-import{border:1px solid #cfe9e1;background:linear-gradient(155deg,#ffffff,#f5fbf8);border-radius:14px;padding:25px;margin:24px 0}
+.native-head h3{font-family:'Manrope';font-size:21px;letter-spacing:-.5px;color:#21474a;margin:9px 0}
+.native-head p{max-width:800px;font-size:12px;color:#748f8c;line-height:1.75;margin:0 0 19px}
+.native-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:17px 0}
+.native-fields label{display:flex;flex-direction:column;gap:7px;border:1px solid #dbeae6;background:#fff;border-radius:10px;padding:14px;color:#365d55;font-size:11px;font-weight:700;min-width:0}
+.native-fields input[type=file]{max-width:100%;font-size:10px;color:#416e65}
+.native-fields input::file-selector-button{padding:7px;border-radius:6px;border:1px solid #cee6dd;background:#eaf8f2;color:#217766;font-size:10px}
+.native-fields small{font-size:10px;color:#7b9991;overflow-wrap:anywhere}
+.native-fields select{margin-top:4px;border:1px solid #dbeae6;border-radius:7px;padding:10px;font-size:10px;min-width:0;background:#fff;color:#365d55}
+.native-disclaimer{font-size:10px;color:#859c94;line-height:1.75;margin:14px 0 0}
+.native-notices{background:#eaf8f3;padding:10px 15px;border-radius:8px;margin-top:16px}
+.native-notices p{display:flex;gap:9px;align-items:start;font-size:11px;color:#3d7163;line-height:1.7;margin:6px 0}
+@media(max-width:1020px){.native-fields{grid-template-columns:1fr 1fr}}@media(max-width:570px){.native-fields{grid-template-columns:1fr}.native-import{padding:19px}.native-head h3{font-size:18px}}

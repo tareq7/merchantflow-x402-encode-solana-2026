@@ -1,36 +1,43 @@
-# SellerPilot AI — Hackathon submission material (October 27, 2026)
+# SellerPilot AI — Updated hackathon submission
 
-## Team name
-SellerPilot AI
+**Status:** Saved in the original Cerebral Valley entry on October 27, 2026, independently verified by reopening the persisted edit form.
 
-## Track
-Startup Track — Build for Your World
+**Team:** SellerPilot AI  
+**Track:** Startups Track  
+**Problem statement:** Build for Your World  
+**Free, open-source repository:** https://github.com/tareq7/sellerpilot-ai  
+**Live application:** https://sellerpilot-ai-phi.vercel.app  
+**112-second revised demo:** https://sellerpilot-ai-phi.vercel.app/demo-video.mp4  
+**Existing submission:** https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/3667016a-f10d-47aa-9da4-1a13902bd9cd/edit
 
-## Problem statement
-A seller can see 7× return on ad spend while the promoted item has only two days of inventory remaining. Amazon and Noon Ads report advertising performance, while stock, supplier lead times, unit economics, and fulfillment availability sit elsewhere. The result is deceptively profitable campaigns driving demand that cannot be fulfilled, plus reactive inventory cuts and wasted marketing spend. Saudi sellers also need a genuinely bilingual tool for these decisions.
+## Project Description
 
-## Project description
-SellerPilot AI is a bilingual Arabic/English, stock-aware marketplace operations copilot for Amazon.sa and Noon.sa. It merges normalized advertising and inventory reports, computes explainable ROAS/ACoS/contribution estimates, ranks stockout and waste risks, and shows the exact formulas and records behind each finding. A what-if spend slider stress-tests stock runway while explicitly labeling assumptions. The seller approves proposed adjustments individually and exports a reviewed CSV; the system never silently changes live campaigns. Its local Data Lab includes a verified daily Amazon Sponsored Products advertised-product report importer with separate SKU costs and VAT controls, and a guided Noon daily SKU report mapper. A quality monitor flags stale reports, duplicates and inconsistent costs, and prevents approval on blocking errors.
+What if your best-performing ad is also your biggest inventory risk? In our synthetic example, a TV protector campaign shows 7x ROAS, but stock lasts only 10 days while replenishment takes 30. Increasing advertising just because ROAS looks good could leave customers ordering products you cannot fulfill. That's why I built SellerPilot AI.
 
-The project was built during the October 26–November 4 hackathon as a new public React/TypeScript/Vite/Hono repository, with synthetic demos, a responsive Arabic RTL interface, serverless deployment, and a 50-test Vitest suite. Live demo: https://sellerpilot-ai-phi.vercel.app. Code: https://github.com/tareq7/sellerpilot-ai.
+SellerPilot is a free, open-source Arabic-English marketplace operations copilot for Amazon.sa and Noon.sa sellers. It connects advertising results to inventory, calculates ROAS, ACoS, estimated contribution and days of stock cover with auditable TypeScript functions, and ranks campaign risks based on business evidence—not just revenue. Open a recommendation to see its SKU, attributed sales, remaining inventory and supplier lead time. A what-if simulator models the implications of a hypothetical +15% spend change, clearly labeling its assumptions rather than presenting a sales forecast.
 
-## Meta AI product and integration
-The API integration targets Meta **Muse Spark 1.3 Contributor** (`muse-spark-1.3-contributor`) via the Meta Model API Chat Completions endpoint. It provides read-only tool calls (`get_verified_kpis` and `get_ranked_opportunities`) over deterministic calculations, letting Muse explain priorities conversationally in Arabic or English without inventing numbers or executing campaign changes. It uses a server-owned synthetic fixture for Contributor-mode privacy and bounds model calls to two turns and 400 output tokens. The tool loop is unit-tested with a mocked provider; **a genuine Contributor response was obtained through Meta's authenticated Model API playground on October 27, 2026**; the separate SellerPilot server-side tool-calling route remains gated and unverified end-to-end. The production model gate remains disabled while safe private credential access is investigated. This statement must be updated before submission if a real call succeeds.
+The seller stays in control: inspect the evidence, stage a proposal and export an approval-marked CSV. SellerPilot never quietly changes campaigns. Data Lab imports daily Amazon Sponsored Products reports with separate cost and VAT inputs, plus guided column-by-column mapping for Noon exports. A data-trust monitor identifies stale or duplicated reports, missing stock and conflicting product costs, blocking unsafe approvals.
 
-## Why Meta models are important
-The decision-critical money and stock formulas must remain exact, but Arabic/English explanations, prioritization across conflicting signals, contextual seller questions, and communicating causal caveats require flexible language reasoning. Muse is scoped as an interpretable read-only orchestrator over transparent functions rather than a generic chatbot or an autonomous ad spender. Contributor mode is suitable only for synthetic demo data because Meta may use inputs and outputs for model improvement.
+Built during the hackathon in React, TypeScript, Vite, Hono and Zod, with responsive Arabic RTL support, 50 passing automated tests and Lighthouse accessibility of 100/100 on mobile and desktop. The new 112-second demo uses natural ElevenLabs v4 narration, 12 redesigned motion scenes and a seller-decision ending—not a generic LLM-chat scene. Public examples are synthetic.
 
-## Demo links
-Live app: https://sellerpilot-ai-phi.vercel.app
-Repository: https://github.com/tareq7/sellerpilot-ai
-Demo video: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (2m54s, narrated live product screens and genuine Meta Contributor playground output; full SellerPilot tool-call path remains gated)
+Live demo: https://sellerpilot-ai-phi.vercel.app
 
-## Submission checklist
-- [x] Video produced under 3 minutes with narration; verify the public deployment URL after its build finishes
-- [x] Genuine Meta Contributor provider response confirmed via the official playground; SellerPilot gated tool-call endpoint remains unverified end-to-end.
-- [ ] Submit final written content and agree to sharing/terms only if covered by authorization
-- [ ] Capture confirmation receipt and final submitted URL
+## Describe use of Meta products
 
-## Post-submission film update, October 27, 2026
+Meta Muse Spark 1.3 Contributor (muse-spark-1.3-contributor) is the language-reasoning layer designed for SellerPilot. The Hono backend integrates with Meta Model API Chat Completions and implements two narrowly scoped read-only tools: get_verified_kpis and get_ranked_opportunities. They return deterministic, evidence-backed campaign and stock metrics so Muse can explain trade-offs naturally in Arabic or English without inventing monetary figures or changing seller accounts.
 
-The same submitted public video URL now serves a redesigned 112.3-second ElevenLabs v4 founder narration and a fully new visual treatment. The LLM chat ending was removed. Demo metrics remain synthetic, and SellerPilot server-side Muse calls remain privately gated.
+Real hosted-model inference WAS verified on October 27, 2026, in Meta's authenticated Model API playground. On synthetic data showing 10 days of stock cover, a 30-day supplier lead time and 7x ROAS, Contributor correctly identified the stockout risk. The SellerPilot server-side tool-calling loop is implemented and passes mocked-provider tests, but its entire path has NOT yet been verified end-to-end against the live model. The public /api/agent endpoint remains gated and disabled to avoid uncontrolled spending.
+
+Contributor receives only a fixed server-owned synthetic dataset; uploaded merchant reports never go to Meta. Tool calls are read-only and bounded, with seller approval required for any proposed action. We deliberately distinguish genuine provider inference from application-side integration tests in our code and demo.
+
+## Why Meta's models are important
+
+Sellers don't need another chatbot that invents financial advice. ROAS, contribution, stock cover and unit economics must be calculated precisely and traced back to their source. Muse addresses the part a spreadsheet cannot: understanding a merchant's question, selecting the right evidence, reconciling apparently conflicting signals (like 7x ROAS against a looming stockout), and explaining the practical options in Arabic or English. The goal is an understandable, evidence-backed decision the seller can approve—not autonomous advertising changes. Contributor's cost efficiency helps make the synthetic prototype accessible; its content-use terms are why private seller files stay outside model inference.
+
+## Partner technologies
+
+We used ElevenLabs Eleven v4 (Mark – Natural Conversations) with restrained inline performance tags for the new 112-second first-person demo narration. Its 12 motion-treated scenes are built from real SellerPilot interface captures, with no LLM chat finale. GitHub hosts the free and open-source code and release assets; Vercel hosts the accessible public demo.
+
+## Update verification
+
+The official form persisted the new **1789-character Project Description**, **1318-character Meta tooling description**, **709-character Why Meta answer**, and partner-technology answer after a fresh navigation. The same public video and GitHub URLs remained, and the Update Project button returned to disabled (no unsaved changes). No new project entry was created.

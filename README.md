@@ -25,7 +25,7 @@ A campaign showing 7× ROAS can be **bad for a business if the advertised SKU ru
 | English + Arabic RTL | Working | One-click localization of labels, alerts and layout |
 | In-browser CSV import | Working | Strict canonicalized rows; raw reports never uploaded to any API |
 | Deterministic analysis API | Working | Auth-free \`POST /api/analyze\`, validated by Zod |
-| Meta Muse Spark 1.3 tool-calling pipeline | Implemented and mock-tested | Meta Chat Completions with structured read-only tool calls |
+| Meta Muse Spark 1.3 Contributor tool-calling pipeline | Implemented and mock-tested | Meta Chat Completions with structured read-only tool calls |
 | Live Meta Model API inference | **Disabled** | Waiting for awarded credits and explicit billing-safe activation; no live inference is claimed |
 | Data-trust monitoring | Working | Report freshness, duplicate grain, cost consistency and velocity checks |
 | Amazon Ads daily advertised-product import | Working | Verified report columns, separate SKU costs, VAT control; see import guide |
@@ -75,7 +75,7 @@ Amazon & Noon reports → local CSV validation → deterministic metrics & inven
                                        ├── ranked evidence-backed decision proposals
                                        ├── in-browser sensitivity analysis
                                        ├── seller-reviewed, safe CSV exports
-                                       └── optional Meta Muse Spark 1.3 tool-calling interface
+                                       └── optional Meta Muse Spark 1.3 Contributor tool-calling interface
                                                    ↓ (only when explicitly enabled)
                                           server-only secure Model API
 \`\`\`
@@ -110,3 +110,7 @@ Newly created in the October 26–November 4 hackathon window: repository, canon
 Run \`npm test\` for Vitest and \`npm run build\` for TypeScript, Vite, and standalone API packaging. The live site, API routes, browser interactions, bilingual state, approval controls, and simulated billing gate were also inspected from an authorized Fleet VM. The running hosted inference remains disabled.
 
 Contributions and issues are welcome. The software is a hackathon demonstration, not investment or financial advice. All bid, budget and stock decisions require independent seller validation.
+
+## Contributor mode: verified selection and billing safeguards (October 27, 2026)
+
+SellerPilot now selects the official Meta model ID `muse-spark-1.3-contributor` on the Chat Completions API. Meta lists $0.10 per million input tokens and $0.20 per million output tokens. Contributor inputs and outputs **may be used by Meta to improve models**, so the app uses a fixed, server-owned synthetic fixture, never private CSV uploads, and the copilot requires a private operator token. The owner confirmed a $150 promotional credit allocation and S$0.00 balance by screenshot. A card is present; Meta explicitly says spend alerts are **not** hard stops and the card could be charged after credits run out. Therefore the production model endpoint stays off by default. A dedicated project API key was created in the Meta dashboard, but live Meta API inference has **not** been verified and no unrestricted public model access is enabled. See [Meta's model list](https://dev.meta.ai/docs/models), [pricing](https://dev.meta.ai/docs/pricing-rate-limits), and [spending alerts](https://dev.meta.ai/help/billing/spend-limit-alert).

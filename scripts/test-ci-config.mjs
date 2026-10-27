@@ -17,6 +17,18 @@ const expectedCommands = [
 function verifyPipeline(yaml) {
   const lines = yaml.split(/\r?\n/).filter((line) => line.trim() && !line.trimStart().startsWith('#'));
   assert.equal(lines.filter((line) => /^\s*- label:/.test(line)).length, 1, 'One CI step only');
+  const allowedStructure = [
+    'steps:',
+    '  - label: ":test_tube: SellerPilot tests and production build"',
+    '    key: verify',
+    '    timeout_in_minutes: 15',
+    '    command: |',
+    ...expectedCommands.map(command => `      ${command}`),
+    '    agents:',
+    '      queue: linux-small',
+  ];
+  assert.deepEqual(lines, allowedStructure, 'Reject unexpected steps, keys, or alternate shell paths');
+
   assert.ok(lines.some((line) => /^\s+queue: linux-small$/.test(line)), 'Use verified hosted Free queue');
   assert.ok(lines.some((line) => /^\s+timeout_in_minutes: 15$/.test(line)), 'Bound minutes to 15');
   const match = yaml.match(/^    command: \|\r?\n((?:^      [^\r\n]+\r?\n?)+)/m);

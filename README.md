@@ -28,7 +28,8 @@ A campaign showing 7× ROAS can be **bad for a business if the advertised SKU ru
 | Meta Muse Spark 1.3 tool-calling pipeline | Implemented and mock-tested | Meta Chat Completions with structured read-only tool calls |
 | Live Meta Model API inference | **Disabled** | Waiting for awarded credits and explicit billing-safe activation; no live inference is claimed |
 | Data-trust monitoring | Working | Report freshness, duplicate grain, cost consistency and velocity checks |
-| Native vendor report adapters | Future work | Vendor exports must first be mapped into documented canonical columns |
+| Amazon Ads daily advertised-product import | Working | Verified report columns, separate SKU costs, VAT control; see import guide |
+| Native Noon Ad Manager export | Pending format verification | Canonical Noon CSV is supported | Vendor exports must first be mapped into documented canonical columns |
 
 ![Opportunity radar in Arabic](docs/assets/radar-ar.jpg)
 ![Evidence drawer and what-if simulator](docs/assets/simulator-en.jpg)
@@ -85,6 +86,10 @@ Amazon & Noon reports → local CSV validation → deterministic metrics & inven
 - **Hosting:** Automatic Git-push deploys to a Vercel Hobby **noncommercial personal hackathon demonstration**. See the [Vercel Hobby policy](https://vercel.com/docs/plans/hobby); commercialization requires a commercially permitted hosting plan/platform. Cloudflare Workers Free remains a possible alternative when its authorization is restored.
 - **Model:** Real Meta Model API request contract: \`POST https://api.meta.ai/v1/chat/completions\`, model \`muse-spark-1.3\`; see [official quickstart](https://dev.meta.ai/docs/cookbook/quickstart-chat-completions). Mock-tested tools return **already verified** KPIs and recommendations, never raw private sales CSVs.
 - **No GitHub Actions dependency:** Builds are performed from Git integration on the connected host. Source and tests are inspectable in this repository.
+
+## Amazon seller report importer
+
+See the [daily Amazon Ads import guide](docs/AMAZON_ADS_IMPORT.md) and [SKU cost CSV template](public/demo/sku-cost-template.csv). Reports are parsed in the browser without uploading private CSVs. This is not a connection to the live seller account.
 
 ## Security and spend controls
 

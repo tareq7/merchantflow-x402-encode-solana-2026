@@ -1,6 +1,6 @@
 /** Deterministic marketplace financial engine. Revenue input net of VAT, currency SAR. */
 export type Market='Amazon.sa'|'Noon.sa';
-export type Ad={date:string;marketplace:Market;sku:string;campaign:string;impressions:number;clicks:number;orders:number;spendSar:number;revenueSar:number;unitCostSar:number;unitsSold?:number;source?:'canonical'|'amazon-advertised-product'};
+export type Ad={date:string;marketplace:Market;sku:string;campaign:string;impressions:number;clicks:number;orders:number;spendSar:number;revenueSar:number;unitCostSar:number;unitsSold?:number;source?:'canonical'|'amazon-advertised-product'|'noon-guided'};
 export type Stock={marketplace:Market;sku:string;availableUnits:number;inboundUnits:number;avgDailyUnits:number;leadTimeDays:number};
 export type Severity='critical'|'high'|'medium'|'low';
 export type Kind='STOCK_PROTECT'|'PAUSE_REVIEW'|'SCALE_REVIEW'|'REPLENISH';
@@ -25,6 +25,7 @@ export function analyze(ads:Ad[],stocks:Stock[],when=new Date()):Analysis {
    const revenueSar=rnd(sum(rows.map(x=>x.revenueSar)));
    const orders=sum(rows.map(x=>x.orders)),unitsSold=sum(rows.map(x=>x.unitsSold??x.orders)),clicks=sum(rows.map(x=>x.clicks)),impressions=sum(rows.map(x=>x.impressions));
    if(rows.some(r=>r.source==='amazon-advertised-product'))warnings.push('Amazon advertised-product report: Purchases may include halo orders. Estimated COGS use promoted SKU units, not total purchases.');
+   if(rows.some(r=>r.source==='noon-guided'))warnings.push('Noon guided import: source column semantics were explicitly mapped by the seller, not independently verified as the native Noon report format.');
    if(new Set(rows.map(r=>r.unitCostSar)).size>1)warnings.push('Inconsistent unit cost for '+first.sku+'/'+first.campaign);
    const contributionSar=rnd(revenueSar-unitsSold*first.unitCostSar-spendSar);
    const s=stock.get(first.marketplace+'|'+first.sku);

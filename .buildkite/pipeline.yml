@@ -1,5 +1,5 @@
 # SellerPilot CI only. No Vercel or Cloudflare production deployments.
-# Queue 'default' must be verified as a Buildkite-hosted Small Linux queue.
+# Targets the verified Free-plan Buildkite-hosted Small Linux queue.
 steps:
   - label: ":test_tube: SellerPilot tests and production build"
     key: verify
@@ -9,4 +9,4 @@ steps:
       npm test
       npm run build
     agents:
-      queue: default
+      queue: linux-small

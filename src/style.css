@@ -34,3 +34,17 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;ma
 .scenario-risk{display:flex;gap:7px;align-items:center;color:#a96831;background:#fff3e5;border-radius:7px;font-size:10px;padding:9px}
 .scenario-caveat{color:#859d94;font-size:10px;line-height:1.65;margin:14px 0 0}
 @media(max-width:570px){.scenario-values{grid-template-columns:1fr 1fr}.scenario-values>div:last-child{grid-column:span 2}}
+.quality-audit{background:white;border:1px solid #deebe7;border-radius:13px;padding:22px 24px;margin:0 0 22px;box-shadow:0 3px 12px #0b302306}
+.quality-heading{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.quality-heading h3{color:#24474a;font-family:'Manrope';font-size:19px;letter-spacing:-.4px;margin:8px 0 6px}
+.quality-heading p{font-size:11px;color:#819a95;margin:0}
+.quality-score{text-align:center;border:1px solid #d5ece3;background:#f4faf7;padding:14px 19px;border-radius:10px;flex:none}
+.quality-score strong{font-size:29px;color:#167e6d;letter-spacing:-1px}.quality-score strong small{font-size:13px;color:#91ada2;letter-spacing:0}
+.quality-score>span{display:block;font-size:10px;color:#4c776b;margin-top:4px}
+.quality-foot{display:flex;gap:28px;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid #eff3f2;flex-wrap:wrap}
+.quality-foot span{font-size:11px;color:#819b99}.quality-foot b{color:#235e58}
+.quality-findings{display:flex;flex-direction:column;gap:9px;margin-top:17px}
+.quality-item{display:flex;gap:11px;border-radius:9px;padding:12px 14px;align-items:flex-start;background:#fff9eb;color:#a26c34;border:1px solid #f6e6c6}
+.quality-item.blocker{color:#a9433b;background:#fff2ef;border-color:#f8d1cb}.quality-item.info{color:#527e89;background:#eef8fa;border-color:#dcecef}
+.quality-item strong{display:block;font-size:11px}.quality-item p{font-size:10px;line-height:1.6;margin:5px 0 0;color:#7e8581}
+@media(max-width:570px){.quality-heading{align-items:flex-start}.quality-heading h3{font-size:15px}.quality-score{padding:9px}.quality-score strong{font-size:22px}.quality-foot{gap:12px;flex-wrap:wrap}}

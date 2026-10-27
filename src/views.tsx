@@ -2,6 +2,7 @@ import React,{useState} from 'react';
 import {Activity,ArrowDownToLine,ArrowRight,ArrowUpRight,BarChart3,Check,CloudUpload,Database,FileText,LockKeyhole,Package,ShieldCheck,Sparkles,Target,TriangleAlert,X} from 'lucide-react';
 import type {Ad,Stock,Opportunity,Analysis,Market} from './domain/engine';
 import {simulateSpendChange} from './domain/simulator';
+import {auditReports} from './domain/data-quality';
 export type ViewProps={
  ar:boolean;t:(en:string,arabic:string)=>string;report:Analysis;market:'All'|Market;
  navigate:(id:'overview'|'radar'|'campaigns'|'actions'|'data'|'copilot')=>void;
@@ -64,9 +65,19 @@ export function Actions(p:ViewProps){const {report,t,ar,approved,staged}=p;retur
  <div className="action-summary"><div><small>{t('PROPOSALS','المقترحات')}</small><strong>{report.opportunities.length}</strong></div><div><small>{t('STAGED FOR EXPORT','معتمدة للتصدير')}</small><strong>{approved.length}</strong></div><button className="primary" onClick={p.exportApproved} disabled={!approved.length}><ArrowDownToLine size={16}/>{t('Export staged CSV','تصدير المقترحات')}</button></div>
  <div className="actions-list">{report.opportunities.map(o=><article key={o.id}><div><Pill s={o.severity}/><h3>{ar?arTitle[o.kind]:o.title}</h3><small>{o.marketplace} · {o.sku} · {o.campaign}</small></div><div className="action-buttons"><button className="secondary" onClick={()=>p.open(o)}>{t('Evidence','الأدلة')}</button><button className={'approval '+(staged[o.id]?'approved':'')} onClick={()=>p.toggle(o)}>{staged[o.id]?<><Check size={16}/>{t('Staged','معتمد')}</>:t('Stage proposal','اعتماد المقترح')}</button></div></article>)}</div>
  </>;}
-export function DataLab(p:ViewProps){const {t,ads,stocks,source}=p;return <>
+export function DataLab(p:ViewProps){const {t,ads,stocks,source}=p;
+ const quality=auditReports(ads,stocks);
+ return <>
  <div className="intro"><LockKeyhole size={25}/><div><strong>{t('Your reports stay in your browser.','تبقى تقاريرك داخل متصفحك.')}</strong><p>{t('CSV imports are parsed and analyzed locally; the files are not sent to Meta or any marketplace. Exclude personal customer information.','تُحلل ملفات CSV محلياً، دون إرسالها إلى ميتا أو المتاجر. لا تستخدم معلومات العملاء.')}</p></div></div>
- <div className="uploads">
+ <section className="quality-audit" aria-label="Imported data quality">
+   <div className="quality-heading">
+    <div><span className="micro">{t('DATA TRUST MONITOR','مراقبة موثوقية البيانات')}</span><h3>{t('Know what your data can support.','اعرف مدى موثوقية بياناتك.')}</h3><p>{t('Freshness, matching inventory, cost completeness and reporting-grain checks.','الحداثة وتطابق المخزون واكتمال التكلفة وفحص تكرار السجلات.')}</p></div>
+    <div className="quality-score"><strong>{quality.score}<small>/100</small></strong><span>{quality.blockers===0&&quality.warnings===0?t('Verified inputs','مدخلات سليمة'):t('Requires review','تحتاج مراجعة')}</span></div>
+   </div>
+   <div className="quality-foot"><span>{t('Blocking issues','أخطاء مانعة')}: <b>{quality.blockers}</b></span><span>{t('Warnings','تحذيرات')}: <b>{quality.warnings}</b></span><span>{t('Latest report','آخر تقرير')}: <b>{quality.latestReportDate??'—'}</b></span></div>
+   {quality.diagnostics.length>0&&<div className="quality-findings">{quality.diagnostics.slice(0,12).map(d=><div key={d.id} className={'quality-item '+d.severity}><TriangleAlert size={16}/><div><strong>{d.title}</strong><p>{d.detail}</p></div></div>)}</div>}
+  </section>
+  <div className="uploads">
   <article className="upload"><div className="upload-icon"><BarChart3 size={26}/></div><span className="micro">01 · ADVERTISING</span><h3>{t('Campaign performance','أداء الحملات')}</h3><p>{t('Spend, orders, attributed revenue, and estimated item cost.','الإنفاق والطلبات والإيرادات وتكلفة البضاعة.')}</p><button className="secondary" onClick={()=>p.adsInput.current?.click()}><CloudUpload size={16}/>{t('Choose ads CSV','اختيار ملف الإعلانات')}</button><small>{ads.length} {t('records loaded','سجلاً محملاً')}</small></article>
   <article className="upload"><div className="upload-icon"><Package size={26}/></div><span className="micro">02 · INVENTORY</span><h3>{t('Stock availability','توفر المخزون')}</h3><p>{t('Available stock, inbound units, recent velocity and supplier lead time.','الكمية المتوفرة والقادمة ومعدل الطلب ومهلة التوريد.')}</p><button className="secondary" onClick={()=>p.stockInput.current?.click()}><CloudUpload size={16}/>{t('Choose stock CSV','اختيار ملف المخزون')}</button><small>{stocks.length} {t('SKUs loaded','منتجاً محملاً')}</small></article>
  </div>

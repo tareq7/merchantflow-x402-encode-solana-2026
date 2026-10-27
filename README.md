@@ -118,3 +118,7 @@ SellerPilot now selects the official Meta model ID `muse-spark-1.3-contributor` 
 ### Genuine Meta Contributor provider verification
 
 On October 27, 2026, the authenticated Meta Model API playground returned a real \`muse-spark-1.3-contributor\` response for a synthetic SKU with 10 days stock cover, 30-day replenishment lead, and 7x ROAS, identifying stockout as the first risk. See [provider test screenshot](docs/assets/meta-contributor-playground.jpg) and the [2m54s demo video](https://sellerpilot-ai-phi.vercel.app/demo-video.mp4). This demonstrates provider inference, **not** an end-to-end call from SellerPilot's gated \`/api/agent\` route; the server-side function-calling loop remains mock-tested only.
+
+### New founder-style ElevenLabs v4 video (October 27, 2026)
+
+[Watch the redesigned 1m52s demo](https://sellerpilot-ai-phi.vercel.app/demo-video.mp4). ElevenLabs v4, Mark — Natural Conversations, inline voice-direction tags and 12 redesigned motion scenes. No LLM chat ending. [Read the script and production notes](docs/VIDEO_V4_SCRIPT.md).

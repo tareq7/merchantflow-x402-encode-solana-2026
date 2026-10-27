@@ -30,3 +30,7 @@ Demo video: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (2m54s, narrate
 - [x] Genuine Meta Contributor provider response confirmed via the official playground; SellerPilot gated tool-call endpoint remains unverified end-to-end.
 - [ ] Submit final written content and agree to sharing/terms only if covered by authorization
 - [ ] Capture confirmation receipt and final submitted URL
+
+## Post-submission film update, October 27, 2026
+
+The same submitted public video URL now serves a redesigned 112.3-second ElevenLabs v4 founder narration and a fully new visual treatment. The LLM chat ending was removed. Demo metrics remain synthetic, and SellerPilot server-side Muse calls remain privately gated.

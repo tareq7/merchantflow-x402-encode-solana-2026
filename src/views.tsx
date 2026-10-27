@@ -1,6 +1,7 @@
-import React from 'react';
+import React,{useState} from 'react';
 import {Activity,ArrowDownToLine,ArrowRight,ArrowUpRight,BarChart3,Check,CloudUpload,Database,FileText,LockKeyhole,Package,ShieldCheck,Sparkles,Target,TriangleAlert,X} from 'lucide-react';
 import type {Ad,Stock,Opportunity,Analysis,Market} from './domain/engine';
+import {simulateSpendChange} from './domain/simulator';
 export type ViewProps={
  ar:boolean;t:(en:string,arabic:string)=>string;report:Analysis;market:'All'|Market;
  navigate:(id:'overview'|'radar'|'campaigns'|'actions'|'data'|'copilot')=>void;
@@ -88,12 +89,30 @@ export function Copilot(p:ViewProps){const {t,ar,question,setQuestion,asking,ans
  {answer&&<div className="answer"><div><ShieldCheck size={16}/>{metaMode?'MODEL STATUS':'DETERMINISTIC · ZERO PAID CALLS'}</div><p>{answer}</p></div>}
  <p className="privacy-line"><LockKeyhole size={16}/>{t('Every financial figure is computed by code. No automatic campaign writes.','تُحسب المؤشرات بالأكواد؛ لا تغييرات تلقائية للحملات.')}</p></div>
  </>;}
-export function DetailDrawer({item,close,...p}:ViewProps&{item:Opportunity;close:()=>void}){return <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Recommendation evidence" onMouseDown={e=>{if(e.currentTarget===e.target)close();}}><aside className="detail-drawer">
+export function DetailDrawer({item,close,...p}:ViewProps&{item:Opportunity;close:()=>void}){
+ const [change,setChange]=useState(0);
+ const relatedCampaign=p.report.campaigns.find(c=>c.marketplace===item.marketplace&&c.sku===item.sku&&c.campaign===item.campaign);
+ const relatedStock=p.stocks.find(st=>st.marketplace===item.marketplace&&st.sku===item.sku);
+ const days=new Set(p.ads.filter(a=>a.marketplace===item.marketplace&&a.sku===item.sku&&a.campaign===item.campaign).map(a=>a.date)).size||1;
+ const hypothetical=relatedCampaign?simulateSpendChange(relatedCampaign,relatedStock,days,change):null;
+ return <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Recommendation evidence" onMouseDown={e=>{if(e.currentTarget===e.target)close();}}><aside className="detail-drawer">
  <header><span><ShieldCheck size={16}/>{p.t('AUDITABLE DECISION RECORD','سجل قرار موثّق')}</span><button aria-label="Close evidence" onClick={close}><X size={22}/></button></header>
  <Pill s={item.severity}/><h2>{p.ar?arTitle[item.kind]:item.title}</h2><p className="drawer-intro">{p.ar?'قرار يتطلب مراجعة الأدلة ومؤشرات المخزون قبل الموافقة.':item.rationale}</p>
  <div className="drawer-stats"><div><small>MARKETPLACE</small><strong>{item.marketplace}</strong></div><div><small>SKU</small><strong>{item.sku}</strong></div><div><small>CONFIDENCE</small><strong>{item.confidence}</strong></div></div>
  <h3>{p.t('Evidence & calculations','الأدلة والحسابات')}</h3>
  <div className="evidence">{item.evidence.map(e=><div key={e.metric}><small>{e.metric.replaceAll('_',' ')}</small><strong>{num(e.value)} <em>{e.unit}</em></strong><p>{e.formula}</p></div>)}</div>
+ {hypothetical&&<section className="scenario">
+  <header className="scenario-heading"><span className="micro"><Activity size={16}/>{p.t('WHAT-IF SENSITIVITY','تحليل الحساسية الافتراضي')}</span><strong>{change>0?'+':''}{change}%</strong></header>
+  <label htmlFor="scenario-slider">{p.t('Hypothetical advertising spend change','تغير افتراضي في الإنفاق الإعلاني')}</label>
+  <input id="scenario-slider" type="range" min="-30" max="30" step="5" value={change} onChange={e=>setChange(Number(e.target.value))}/>
+  <div className="scenario-values">
+   <div><small>{p.t('ILLUSTRATIVE SPEND','إنفاق افتراضي')}</small><strong>{money(hypothetical.illustrativeSpendSar)}</strong></div>
+   <div><small>{p.t('CONSTANT-ROAS REFERENCE','إيرادات مرجعية')}</small><strong>{hypothetical.illustrativeRevenueSar===null?'—':money(hypothetical.illustrativeRevenueSar)}</strong></div>
+   <div><small>{p.t('STOCK COVER UNDER STRESS','تغطية مخزون تحت الضغط')}</small><strong>{num(hypothetical.stressedDaysOfCover,' days')}</strong></div>
+  </div>
+  {hypothetical.stockRunwayRisk&&<p className="scenario-risk"><TriangleAlert size={15}/>{p.t('Stock cover falls inside the reported replenishment lead time.','تغطية المخزون أقل من فترة التوريد.')}</p>}
+  <p className="scenario-caveat">{p.t('Illustration only: assumes unchanged ROAS, proportional attribution and no organic cannibalization. Not a forecast or recommended bid.','للتوضيح فقط: يفترض ثبات العائد ونسبة الطلبات دون قياس تأثير الطلب العضوي. ليس توقعاً أو توصية بسعر المزايدة.')}</p>
+ </section>}
  <div className="proposal"><span className="micro">{p.t('PROPOSED HUMAN ACTION','إجراء مقترح للبائع')}</span><p>{p.ar?'راجع المقترح بنفسك، ولا يتم تنفيذه تلقائياً.':item.proposedAction}</p></div>
  <div className="drawer-actions"><button className="secondary" onClick={close}>{p.t('Close','إغلاق')}</button><button className="approval" onClick={()=>{p.toggle(item);close();p.navigate('actions');}}>{p.staged[item.id]?p.t('Remove from staged','إلغاء الاعتماد'):p.t('Stage for export','اعتماد للتصدير')} <ArrowRight size={16}/></button></div>
  </aside></div>;}

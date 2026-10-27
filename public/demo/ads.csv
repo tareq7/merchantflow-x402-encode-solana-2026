@@ -1,0 +1,19 @@
+date,marketplace,sku,campaign,impressions,clicks,orders,spend_sar,revenue_sar,unit_cost_sar
+2026-10-25,Amazon.sa,TV85-FLAT,Exact - 85in Protector,18200,410,31,1850,12950,172
+2026-10-26,Amazon.sa,TV85-FLAT,Exact - 85in Protector,17100,380,29,1760,11930,172
+2026-10-25,Amazon.sa,TV65-FLAT,Auto - 65in Broad,22700,510,48,1330,14290,116
+2026-10-26,Amazon.sa,TV65-FLAT,Auto - 65in Broad,21600,480,45,1280,13800,116
+2026-10-25,Amazon.sa,TV50-FLAT,Discovery - 50in,18600,235,2,770,430,78
+2026-10-26,Amazon.sa,TV50-FLAT,Discovery - 50in,19100,248,0,810,0,78
+2026-10-25,Amazon.sa,TV100-FLAT,High Intent - 100in,8200,165,13,930,7610,410
+2026-10-26,Amazon.sa,TV100-FLAT,High Intent - 100in,8700,179,11,1050,6120,410
+2026-10-25,Noon.sa,TV75-FLAT,Search - 75in Screen,13700,360,28,920,9560,145
+2026-10-26,Noon.sa,TV75-FLAT,Search - 75in Screen,13000,339,26,880,8900,145
+2026-10-25,Noon.sa,TV85-FLAT,Premium - 85in,9800,230,12,910,5650,172
+2026-10-26,Noon.sa,TV85-FLAT,Premium - 85in,9600,224,13,910,6210,172
+2026-10-25,Noon.sa,TV43-FLAT,Category - 43in,23700,410,3,570,430,65
+2026-10-26,Noon.sa,TV43-FLAT,Category - 43in,24800,421,2,590,340,65
+2026-10-25,Noon.sa,TV98-FLAT,Large Format - 98in,7200,91,6,510,5320,355
+2026-10-26,Noon.sa,TV98-FLAT,Large Format - 98in,7400,96,5,535,4700,355
+2026-10-25,Amazon.sa,TV55-CURVE,Curved - 55in,9500,213,13,440,2510,88
+2026-10-26,Amazon.sa,TV55-CURVE,Curved - 55in,10010,220,15,460,2780,88

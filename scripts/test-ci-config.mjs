@@ -59,11 +59,11 @@ test('conditional skip, fake test and alternative deployment commands fail polic
   ];
   for (const [before, after] of injectionCases) {
     assert.throws(() => verifyPipeline(source.replace(before, after)),
-      undefined, `Mutation must be rejected: ${after}`);
+      assert.AssertionError, `Mutation must be rejected: ${after}`);
   }
 });
 
 test('an extra unlabeled shell step cannot execute unchecked code', () => {
   assert.throws(() => verifyPipeline(source + '\n  - command: npm run deploy\n'),
-    undefined, 'Unlabeled steps must fail the contract');
+    assert.AssertionError, 'Unlabeled steps must fail the contract');
 });

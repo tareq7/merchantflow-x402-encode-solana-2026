@@ -4,6 +4,7 @@ import type {Ad,Stock,Opportunity,Analysis,Market} from './domain/engine';
 import {simulateSpendChange} from './domain/simulator';
 import {auditReports,type QualityReport} from './domain/data-quality';
 import type {AmazonVatTreatment} from './domain/native-amazon';
+import {headersOf,expectedNoonFields,type GuidedMetric,type NoonMapping} from './domain/guided-noon';
 export type ViewProps={
  ar:boolean;t:(en:string,arabic:string)=>string;report:Analysis;market:'All'|Market;quality:QualityReport;
  navigate:(id:'overview'|'radar'|'campaigns'|'actions'|'data'|'copilot')=>void;
@@ -13,6 +14,7 @@ export type ViewProps={
  upload:(f:File|undefined,kind:'ads'|'stocks')=>Promise<void>;
  adsInput:React.RefObject<HTMLInputElement|null>;stockInput:React.RefObject<HTMLInputElement|null>;
  importNativeAmazon:(report:File|undefined,cost:File|undefined,vat:AmazonVatTreatment)=>Promise<void>;nativeNotices:string[];
+ importNoonGuided:(report:File|undefined,cost:File|undefined,mapping:NoonMapping,vat:AmazonVatTreatment,confirmed:boolean)=>Promise<void>;noonNotices:string[];
  question:string;setQuestion:(v:string)=>void;answer:string;asking:boolean;
  metaMode:boolean;setMetaMode:(v:boolean)=>void;token:string;setToken:(v:string)=>void;
  ask:(q?:string)=>Promise<void>;
@@ -115,9 +117,58 @@ export function DataLab(p:ViewProps){const {t,ads,stocks,source}=p;
    <p className="native-disclaimer">{t('Daily reports only. SAR currency only. Separate stock CSV still required. Campaign attribution and actual promoted units are not interchangeable. No private files are uploaded to the server.','تقارير يومية وبالريال فقط. يلزم ملف مخزون منفصل. المشتريات المنسوبة والوحدات المروّجة ليست متطابقة. الملفات لا تغادر المتصفح.')}</p>
    {p.nativeNotices.length>0&&<div className="native-notices">{p.nativeNotices.map((notice,i)=><p key={i}><Check size={13}/>{notice}</p>)}</div>}
   </section>
-  <div className="panel contract"><div><h3><FileText size={19}/>{t('Canonical CSV contracts','صيغة CSV الموحدة')}</h3><p>{t('Native Amazon/Noon exports differ; normalize them to these columns. Net revenue excludes VAT.','التقارير الأصلية لأمازون ونون تتطلب توحيد أسماء الأعمدة. الإيرادات لا تشمل ضريبة القيمة المضافة.')}</p><code>date,marketplace,sku,campaign,impressions,clicks,orders,spend_sar,revenue_sar,unit_cost_sar</code><code>marketplace,sku,available_units,inbound_units,avg_daily_units,lead_time_days</code><small>{t('Current source','مصدر البيانات')}: {source}</small></div><button className="secondary" onClick={()=>void p.loadDemo()}>{t('Restore synthetic demo','استعادة البيانات التجريبية')}</button></div>
+  <NoonGuidedImport {...p}/><div className="panel contract"><div><h3><FileText size={19}/>{t('Canonical CSV contracts','صيغة CSV الموحدة')}</h3><p>{t('Native Amazon/Noon exports differ; normalize them to these columns. Net revenue excludes VAT.','التقارير الأصلية لأمازون ونون تتطلب توحيد أسماء الأعمدة. الإيرادات لا تشمل ضريبة القيمة المضافة.')}</p><code>date,marketplace,sku,campaign,impressions,clicks,orders,spend_sar,revenue_sar,unit_cost_sar</code><code>marketplace,sku,available_units,inbound_units,avg_daily_units,lead_time_days</code><small>{t('Current source','مصدر البيانات')}: {source}</small></div><button className="secondary" onClick={()=>void p.loadDemo()}>{t('Restore synthetic demo','استعادة البيانات التجريبية')}</button></div>
  <div className="panel disclosures"><h3><TriangleAlert size={19}/>{t('Financial and data assumptions','افتراضات مالية وبيانات')}</h3>{p.report.warnings.map((warning,i)=><p key={i}>{warning}</p>)}</div>
  </>;}
+export function NoonGuidedImport(p:ViewProps){
+ const [report,setReport]=useState<File|undefined>();
+ const [cost,setCost]=useState<File|undefined>();
+ const [columns,setColumns]=useState<string[]>([]);
+ const [mapping,setMapping]=useState<Partial<NoonMapping>>({});
+ const [vat,setVat]=useState<''|AmazonVatTreatment>('');
+ const [sarConfirmed,setSarConfirmed]=useState(false);
+ const names:Record<GuidedMetric,string>={date:'Reporting day',campaign:'Campaign',sku:'Advertised SKU',impressions:'Impressions/views',clicks:'Clicks',orders:'Attributed orders',unitsSold:'SKU units sold',spend:'Advertising spend (SAR)',revenue:'Attributed sales (SAR)'};
+ const ready=!!report&&!!cost&&!!vat&&sarConfirmed&&expectedNoonFields.every(k=>mapping[k])&&new Set(expectedNoonFields.map(k=>mapping[k])).size===expectedNoonFields.length;
+ async function selectFile(f:File|undefined){
+  setReport(f);setColumns([]);setMapping({});
+  if(f){try{if(f.size>600000)throw Error('CSV exceeds 600 KB');setColumns(headersOf(await f.text()));}catch(e){setColumns([]);}}
+ }
+ return <section className="noon-import">
+  <div className="micro">{p.t('NOON ADS · EXPLICIT COLUMN MAPPING','إعلانات نون · تحديد أعمدة صريح')}</div>
+  <h3>{p.t('Import a Noon campaign report without guessing its format','استيراد تقرير حملات نون دون افتراض صيغة ثابتة')}</h3>
+  <p>{p.t('Noon export layouts differ. Select which source column actually represents each daily SKU metric; do not map campaign totals to SKU sales. CSV only.','تختلف صيغ تقارير نون. حدد عمود المصدر الذي يمثل كل مقياس يومي للمنتج ولا تستخدم إجماليات الحملة كمبيعات للمنتج. ملفات CSV فقط.')}</p>
+  <div className="noon-files">
+   <label>{p.t('Noon Ads performance CSV','تقرير إعلانات نون CSV')}<input type="file" accept=".csv,text/csv" onChange={e=>void selectFile(e.target.files?.[0])}/></label>
+   <label>{p.t('Private SKU unit costs CSV','تكاليف المنتجات CSV')}<input type="file" accept=".csv,text/csv" onChange={e=>setCost(e.target.files?.[0])}/></label>
+  </div>
+  {columns.length>0&&<div className="noon-map">
+   {expectedNoonFields.map(k=><label key={k}>{names[k]}
+    <select aria-label={names[k]} value={mapping[k]??''} onChange={e=>setMapping(m=>({...m,[k]:e.target.value}))}>
+     <option value="">{p.t('Select source column','اختر عمود المصدر')}</option>
+     {columns.map((col,i)=><option value={col} key={i}>{col}</option>)}
+    </select>
+   </label>)}
+   <label>Currency (optional verification)
+    <select value={mapping.currency??''} onChange={e=>setMapping(m=>({...m,currency:e.target.value||undefined}))}>
+     <option value="">No currency column</option>{columns.map((col,i)=><option key={i} value={col}>{col}</option>)}
+    </select>
+   </label>
+  </div>}
+  <div className="noon-confirm">
+   <label>{p.t('Sales tax treatment (required)','معاملة الضريبة (إلزامي)')}
+    <select value={vat} onChange={e=>setVat(e.target.value as typeof vat)}>
+     <option value="">{p.t('Select — do not guess','اختر — دون افتراض')}</option>
+     <option value="sales-net-of-vat">{p.t('Sales exclude VAT','المبيعات دون ضريبة')}</option>
+     <option value="sales-include-15pct-vat">{p.t('Sales include 15% VAT','المبيعات تشمل 15٪')}</option>
+    </select>
+   </label>
+   <label className="noon-verify"><input type="checkbox" checked={sarConfirmed} onChange={e=>setSarConfirmed(e.target.checked)}/>{p.t('I verified this is a KSA SAR, daily, SKU-level ad report.','أكد أن التقرير سعودي وبالريال ويومي وعلى مستوى المنتج.')}</label>
+  </div>
+  <button className="primary" disabled={!ready} onClick={()=>void p.importNoonGuided(report,cost,mapping as NoonMapping,vat as AmazonVatTreatment,sarConfirmed)}><CloudUpload size={16}/>{p.t('Validate and import Noon metrics','التحقق واستيراد بيانات نون')}</button>
+  <p className="native-disclaimer">{p.t('Mapping is seller-defined, not an independently certified Noon native export schema. Requires distinct attributed purchases and promoted unit columns. Raw CSV never leaves the browser.','تحديد الأعمدة مسؤولية البائع، وليس صيغة رسمية موثقة من نون. يتطلب عداد مشتريات ووحدات منفصلين. الملفات لا تغادر المتصفح.')}</p>
+  {p.noonNotices.length>0&&<div className="native-notices">{p.noonNotices.map((x,i)=><p key={i}><Check size={13}/>{x}</p>)}</div>}
+ </section>;
+}
 export function Copilot(p:ViewProps){const {t,ar,question,setQuestion,asking,answer,metaMode,setMetaMode,token,setToken,ask}=p;return <>
  <div className="copilot-hero"><div className="ai-symbol"><Sparkles size={31}/></div><div><span className="micro">META MUSE SPARK 1.3</span><h2>{t('Sharper questions. Auditable answers.','أسئلة أذكى. إجابات موثقة.')}</h2><p>{t('The free rules engine works now; live Meta API calls stay disabled until credits are confirmed and safe spending controls are configured.','محرك القواعد الحسابية مجاني؛ طلبات ميوز معطلة حتى تأكيد الرصيد وضوابط الإنفاق.')}</p></div></div>
  <div className="copilot"><div className="mode"><button className={!metaMode?'active':''} onClick={()=>setMetaMode(false)}><ShieldCheck size={17}/>{t('Verified rules · free','قواعد موثقة · مجاناً')}</button><button className={metaMode?'active':''} onClick={()=>setMetaMode(true)}><Sparkles size={17}/>Meta Muse · opt-in</button></div>

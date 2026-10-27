@@ -18,7 +18,7 @@ Event: https://cerebralvalley.ai/e/meta-ai-developer-hackathon/details
 - [x] Public repository: https://github.com/tareq7/sellerpilot-ai
 - [x] Working application: https://sellerpilot-ai-phi.vercel.app
 - [ ] Final polished project description explaining new work during hackathon.
-- [ ] A shareable 3-minute video demonstrating live product and actual Meta AI feature where available.
+- [x] A shareable 2m38s narrated product walkthrough: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (Meta inference explicitly not verified).
 - [ ] Explain exactly how Meta models were used, distinguish live and mocked testing.
 - [ ] Explain why Meta models are essential rather than generic inference.
 - [ ] Confirm the submission form's promotional-sharing consent explicitly at submission, and submit the final form.

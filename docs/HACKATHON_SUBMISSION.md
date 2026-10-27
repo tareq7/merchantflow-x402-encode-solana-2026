@@ -23,10 +23,10 @@ The decision-critical money and stock formulas must remain exact, but Arabic/Eng
 ## Demo links
 Live app: https://sellerpilot-ai-phi.vercel.app
 Repository: https://github.com/tareq7/sellerpilot-ai
-Demo video: PENDING — replace with working public video URL before pressing Submit
+Demo video: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (2m38s, narrated real product screenshots; no live model inference claimed)
 
 ## Submission checklist
-- [ ] Video complete, under 3 minutes, legible with audio and accessible without sign-in
+- [x] Video produced under 3 minutes with narration; verify the public deployment URL after its build finishes
 - [ ] Verify actual Meta API call if possible; do not assert live results otherwise
 - [ ] Submit final written content and agree to sharing/terms only if covered by authorization
 - [ ] Capture confirmation receipt and final submitted URL

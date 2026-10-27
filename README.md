@@ -2,7 +2,7 @@
 
 **An evidence-backed, bilingual marketplace-operations copilot for Amazon.sa and Noon.sa.**
 
-[**Launch the live hackathon demo**](https://sellerpilot-ai-phi.vercel.app) · [Architecture](docs/ARCHITECTURE.md) · [3-minute demo outline](docs/DEMO_SCRIPT.md) · [Test & release evidence](docs/QA_REPORT.md)
+[**Launch the live hackathon demo**](https://sellerpilot-ai-phi.vercel.app) · [**Watch the narrated 2m38s video**](https://sellerpilot-ai-phi.vercel.app/demo-video.mp4) · [Architecture](docs/ARCHITECTURE.md) · [3-minute demo outline](docs/DEMO_SCRIPT.md) · [Test & release evidence](docs/QA_REPORT.md)
 
 > **Hackathon prototype:** Created during the Meta Global AI Developer Hackathon, October 26–November 4, 2026. Startup Track → Build for Your World. Demo data is synthetic. The production demo does not connect to private sellers or modify advertising accounts.
 

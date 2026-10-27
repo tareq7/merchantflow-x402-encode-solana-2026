@@ -18,7 +18,7 @@ Signals include SKU, campaign, marketplace, priority, severity, source metrics, 
 
 ## Layer 4: Meta Muse tool calls
 
-\`src/worker.ts\` implements Meta Model API Chat Completions using \`muse-spark-1.3\`. Two registered read-only tools are available to the model:
+\`src/worker.ts\` implements Meta Model API Chat Completions using \`muse-spark-1.3-contributor\`. Two registered read-only tools are available to the model:
 - \`get_verified_kpis\`: obtain deterministic authoritative totals.
 - \`get_ranked_opportunities\`: obtain ranked evidence-backed opportunities.
 
@@ -35,3 +35,7 @@ Cloudflare Workers + static assets is the intended architecture when Wrangler au
 ## Future production hardening
 
 Marketplace vendor-specific import adapters, consent/authentication, multi-tenant isolation, PII redaction, budget hard-stop, rate limiting, audit log storage, attribution consistency, shipping/fees/returns modeling, and fully scoped authorized marketplace write connectors are intentionally outside this demo's verified feature set.
+
+## Contributor inference privacy boundary (October 27)
+
+The backend accepts only a question, locale, and an explicit `synthetic-only` marker for the `/api/agent` endpoint. It rejects caller-supplied ads and inventory arrays and uses a trusted static synthetic dataset compiled in `src/domain/server-demo.ts`. This prevents accidentally sending real imported financial reports to the Contributor service, where Meta may use prompts/outputs for model improvement. All API keys remain server-side, the public deployment stays disabled by default, and model turns/output tokens are bounded. A model-generated narrative cannot execute marketplace writes.

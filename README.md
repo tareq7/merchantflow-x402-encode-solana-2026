@@ -122,3 +122,5 @@ On October 27, 2026, the authenticated Meta Model API playground returned a real
 ### New founder-style ElevenLabs v4 video (October 27, 2026)
 
 [Watch the redesigned 1m52s demo](https://sellerpilot-ai-phi.vercel.app/demo-video.mp4). ElevenLabs v4, Mark — Natural Conversations, inline voice-direction tags and 12 redesigned motion scenes. No LLM chat ending. [Read the script and production notes](docs/VIDEO_V4_SCRIPT.md).
+
+**Voice credit:** Narrated with **ElevenLabs (11.ai)**. This narration was generated on the provider's Free plan, which permits only properly attributed noncommercial use. A paid commercial license or a separately licensed voiceover is needed for commercial/promotional distribution. The ElevenLabs account was not upgraded or charged.

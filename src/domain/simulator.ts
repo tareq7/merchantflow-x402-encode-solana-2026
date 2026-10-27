@@ -22,7 +22,7 @@ export function simulateSpendChange(c:Campaign,stock:Stock|undefined,observedDay
  if(!Number.isFinite(changePct)||changePct < -50||changePct>50)throw Error('Change must be between -50 and +50 percent');
  if(!Number.isFinite(observedDays)||observedDays<1)throw Error('Observed days must be positive');
  const multiplier=1+changePct/100;
- const extraPaidDailyOrders=Math.max(0,changePct/100)*c.orders/observedDays;
+ const extraPaidDailyOrders=Math.max(0,changePct/100)*c.unitsSold/observedDays;
  const daily=stock?.avgDailyUnits??0;
  const currentDaysOfCover=stock&&daily>0?r(stock.availableUnits/daily,1):null;
  const stressedDaysOfCover=stock&&daily+extraPaidDailyOrders>0?r(stock.availableUnits/(daily+extraPaidDailyOrders),1):null;

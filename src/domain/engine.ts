@@ -1,12 +1,12 @@
 /** Deterministic marketplace financial engine. Revenue input net of VAT, currency SAR. */
 export type Market='Amazon.sa'|'Noon.sa';
-export type Ad={date:string;marketplace:Market;sku:string;campaign:string;impressions:number;clicks:number;orders:number;spendSar:number;revenueSar:number;unitCostSar:number};
+export type Ad={date:string;marketplace:Market;sku:string;campaign:string;impressions:number;clicks:number;orders:number;spendSar:number;revenueSar:number;unitCostSar:number;unitsSold?:number;source?:'canonical'|'amazon-advertised-product'};
 export type Stock={marketplace:Market;sku:string;availableUnits:number;inboundUnits:number;avgDailyUnits:number;leadTimeDays:number};
 export type Severity='critical'|'high'|'medium'|'low';
 export type Kind='STOCK_PROTECT'|'PAUSE_REVIEW'|'SCALE_REVIEW'|'REPLENISH';
 export type Evidence={metric:string;value:number;unit:string;formula:string};
 export type Opportunity={id:string;kind:Kind;severity:Severity;score:number;marketplace:Market;sku:string;campaign:string;title:string;rationale:string;proposedAction:string;spendUnderReviewSar:number;evidence:Evidence[];confidence:'high'|'medium';status:'PROPOSED'};
-export type Campaign={id:string;marketplace:Market;sku:string;campaign:string;spendSar:number;revenueSar:number;orders:number;clicks:number;impressions:number;roas:number|null;acosPct:number|null;ctrPct:number|null;cpcSar:number|null;contributionSar:number;daysOfCover:number|null;reorderPoint:number|null;availableUnits:number|null;leadTimeDays:number|null};
+export type Campaign={id:string;marketplace:Market;sku:string;campaign:string;spendSar:number;revenueSar:number;orders:number;unitsSold:number;clicks:number;impressions:number;roas:number|null;acosPct:number|null;ctrPct:number|null;cpcSar:number|null;contributionSar:number;daysOfCover:number|null;reorderPoint:number|null;availableUnits:number|null;leadTimeDays:number|null};
 export type Analysis={generatedAt:string;summary:{spendSar:number;revenueSar:number;orders:number;roas:number|null;acosPct:number|null;contributionSar:number;spendUnderReviewSar:number;activeCampaigns:number;criticalAlerts:number;marketplaces:number};campaigns:Campaign[];opportunities:Opportunity[];warnings:string[]};
 const rnd=(n:number,p=2)=>Number(n.toFixed(p));
 const ratio=(a:number,b:number)=>b>0?rnd(a/b):null;
@@ -23,13 +23,14 @@ export function analyze(ads:Ad[],stocks:Stock[],when=new Date()):Analysis {
  for(const rows of grouped.values()){
    const first=rows[0]!;const spendSar=rnd(sum(rows.map(x=>x.spendSar)));
    const revenueSar=rnd(sum(rows.map(x=>x.revenueSar)));
-   const orders=sum(rows.map(x=>x.orders)),clicks=sum(rows.map(x=>x.clicks)),impressions=sum(rows.map(x=>x.impressions));
+   const orders=sum(rows.map(x=>x.orders)),unitsSold=sum(rows.map(x=>x.unitsSold??x.orders)),clicks=sum(rows.map(x=>x.clicks)),impressions=sum(rows.map(x=>x.impressions));
+   if(rows.some(r=>r.source==='amazon-advertised-product'))warnings.push('Amazon advertised-product report: Purchases may include halo orders. Estimated COGS use promoted SKU units, not total purchases.');
    if(new Set(rows.map(r=>r.unitCostSar)).size>1)warnings.push('Inconsistent unit cost for '+first.sku+'/'+first.campaign);
-   const contributionSar=rnd(revenueSar-orders*first.unitCostSar-spendSar);
+   const contributionSar=rnd(revenueSar-unitsSold*first.unitCostSar-spendSar);
    const s=stock.get(first.marketplace+'|'+first.sku);
    if(!s)warnings.push('Missing inventory for '+first.marketplace+' / '+first.sku+'; stock advice suppressed.');
    const cover=s&&s.avgDailyUnits>0?rnd(s.availableUnits/s.avgDailyUnits,1):null;
-   const c:Campaign={id:key(first),marketplace:first.marketplace,sku:first.sku,campaign:first.campaign,spendSar,revenueSar,orders,clicks,impressions,roas:ratio(revenueSar,spendSar),acosPct:ratio(spendSar*100,revenueSar),ctrPct:ratio(clicks*100,impressions),cpcSar:ratio(spendSar,clicks),contributionSar,daysOfCover:cover,reorderPoint:s?rnd(s.avgDailyUnits*s.leadTimeDays):null,availableUnits:s?.availableUnits??null,leadTimeDays:s?.leadTimeDays??null};
+   const c:Campaign={id:key(first),marketplace:first.marketplace,sku:first.sku,campaign:first.campaign,spendSar,revenueSar,orders,unitsSold,clicks,impressions,roas:ratio(revenueSar,spendSar),acosPct:ratio(spendSar*100,revenueSar),ctrPct:ratio(clicks*100,impressions),cpcSar:ratio(spendSar,clicks),contributionSar,daysOfCover:cover,reorderPoint:s?rnd(s.avgDailyUnits*s.leadTimeDays):null,availableUnits:s?.availableUnits??null,leadTimeDays:s?.leadTimeDays??null};
    campaigns.push(c);
    const base={marketplace:c.marketplace,sku:c.sku,campaign:c.campaign,spendUnderReviewSar:spendSar,status:'PROPOSED' as const};
    if(s&&cover!==null&&cover<=s.leadTimeDays+3&&spendSar>0){

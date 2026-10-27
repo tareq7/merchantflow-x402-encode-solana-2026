@@ -104,7 +104,7 @@ export function App(){
   if(!metaMode){setAnswer(local);setAsking(false);return;}
   if(source!=='synthetic'){setAnswer(t('Contributor mode uses synthetic data only. Restore demo to avoid submitting private reports to Meta.','وضع المساهم يقتصر على البيانات التجريبية. استعد العينة لتجنب إرسال تقاريرك الخاصة إلى ميتا.'));setAsking(false);return;}
   try{
-   const r=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json',...(token?{'Authorization':'Bearer '+token}:{})},body:JSON.stringify({ads,stocks,question:q,locale:ar?'ar':'en',datasetConsent:'synthetic-only'})});
+   const r=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json',...(token?{'Authorization':'Bearer '+token}:{})},body:JSON.stringify({question:q,locale:ar?'ar':'en',datasetConsent:'synthetic-only'})});
    const o=await r.json() as {answer?:string;error?:string;message?:string};
    if(!r.ok)throw Error(o.message||o.error||'Model unavailable');
    setAnswer(o.answer||'No answer available');

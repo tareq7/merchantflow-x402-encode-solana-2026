@@ -2,6 +2,7 @@ import {Hono} from 'hono';
 import {secureHeaders} from 'hono/secure-headers';
 import {z} from 'zod';
 import {analyze,type Ad,type Stock,type Analysis} from './domain/engine';
+import {modelDemoAds,modelDemoStock} from './domain/server-demo';
 
 type Env={Bindings:{MODEL_API_KEY?:string;AI_ACCESS_TOKEN?:string;ALLOW_MODEL_CALLS?:string;ASSETS?:{fetch:(r:Request)=>Promise<Response>}}};
 export const app=new Hono<Env>();
@@ -13,7 +14,7 @@ const positiveInt=finite.int();
 const ad=z.object({date:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),marketplace:market,sku:z.string().min(1).max(96),campaign:z.string().min(1).max(96),impressions:positiveInt,clicks:positiveInt,orders:positiveInt,spendSar:finite,revenueSar:finite,unitCostSar:finite,unitsSold:positiveInt.optional(),source:z.enum(['canonical','amazon-advertised-product','noon-guided']).optional()}).strict();
 const stock=z.object({marketplace:market,sku:z.string().min(1).max(96),availableUnits:positiveInt,inboundUnits:positiveInt,avgDailyUnits:finite,leadTimeDays:finite}).strict();
 const body=z.object({ads:z.array(ad).max(2000),stocks:z.array(stock).max(2000)}).strict();
-const agentBody=body.extend({question:z.string().trim().min(2).max(600),locale:z.enum(['en','ar']).default('en'),datasetConsent:z.literal('synthetic-only')});
+const agentBody=z.object({question:z.string().trim().min(2).max(400),locale:z.enum(['en','ar']).default('en'),datasetConsent:z.literal('synthetic-only')}).strict();
 const responseHeaders={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const getAnalysis=(ads:Ad[],stocks:Stock[])=>analyze(ads,stocks);
 app.get('/api/health',c=>c.json({ok:true,project:'SellerPilot AI',metaModel:'muse-spark-1.3-contributor',mode:c.env?.ALLOW_MODEL_CALLS==='true'?'opt-in':'demo-safe',timestamp:new Date().toISOString()},200,responseHeaders));
@@ -65,11 +66,9 @@ app.post('/api/agent',async c=>{
  const bytes=Number(c.req.header('content-length')||'0');if(bytes>500000)return c.json({error:'payload_too_large'},413,responseHeaders);
  const input=agentBody.safeParse(await c.req.json().catch(()=>null));
  if(!input.success)return c.json({error:'invalid_contract'},400,responseHeaders);
- const {ads,stocks,question,locale}=input.data;
- if(ads.some(a=>a.source==='noon-guided'||a.source==='amazon-advertised-product'))return c.json({error:'private_data_forbidden_on_contributor'},403,responseHeaders);
- if(ads.some(a=>a.clicks>a.impressions||a.orders>a.clicks))return c.json({error:'invalid_contract'},400,responseHeaders);
+ const {question,locale}=input.data;
  try {
-   const output=await muse(getAnalysis(ads,stocks),question,locale,env.MODEL_API_KEY);
+   const output=await muse(getAnalysis(modelDemoAds,modelDemoStock),question,locale,env.MODEL_API_KEY);
    return c.json(output,200,responseHeaders);
  }catch(e){
    const cause=e instanceof Error?e.message:'unknown';

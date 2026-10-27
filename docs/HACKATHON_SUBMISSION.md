@@ -15,7 +15,7 @@ SellerPilot AI is a bilingual Arabic/English, stock-aware marketplace operations
 The project was built during the October 26–November 4 hackathon as a new public React/TypeScript/Vite/Hono repository, with synthetic demos, a responsive Arabic RTL interface, serverless deployment, and a 50-test Vitest suite. Live demo: https://sellerpilot-ai-phi.vercel.app. Code: https://github.com/tareq7/sellerpilot-ai.
 
 ## Meta AI product and integration
-The API integration targets Meta **Muse Spark 1.3 Contributor** (`muse-spark-1.3-contributor`) via the Meta Model API Chat Completions endpoint. It provides read-only tool calls (`get_verified_kpis` and `get_ranked_opportunities`) over deterministic calculations, letting Muse explain priorities conversationally in Arabic or English without inventing numbers or executing campaign changes. It uses a server-owned synthetic fixture for Contributor-mode privacy and bounds model calls to two turns and 400 output tokens. The tool loop is unit-tested with a mocked provider; **no genuine remote Contributor model response has yet been verified**, as of October 27, 2026. The production model gate remains disabled while safe private credential access is investigated. This statement must be updated before submission if a real call succeeds.
+The API integration targets Meta **Muse Spark 1.3 Contributor** (`muse-spark-1.3-contributor`) via the Meta Model API Chat Completions endpoint. It provides read-only tool calls (`get_verified_kpis` and `get_ranked_opportunities`) over deterministic calculations, letting Muse explain priorities conversationally in Arabic or English without inventing numbers or executing campaign changes. It uses a server-owned synthetic fixture for Contributor-mode privacy and bounds model calls to two turns and 400 output tokens. The tool loop is unit-tested with a mocked provider; **a genuine Contributor response was obtained through Meta's authenticated Model API playground on October 27, 2026**; the separate SellerPilot server-side tool-calling route remains gated and unverified end-to-end. The production model gate remains disabled while safe private credential access is investigated. This statement must be updated before submission if a real call succeeds.
 
 ## Why Meta models are important
 The decision-critical money and stock formulas must remain exact, but Arabic/English explanations, prioritization across conflicting signals, contextual seller questions, and communicating causal caveats require flexible language reasoning. Muse is scoped as an interpretable read-only orchestrator over transparent functions rather than a generic chatbot or an autonomous ad spender. Contributor mode is suitable only for synthetic demo data because Meta may use inputs and outputs for model improvement.
@@ -23,10 +23,10 @@ The decision-critical money and stock formulas must remain exact, but Arabic/Eng
 ## Demo links
 Live app: https://sellerpilot-ai-phi.vercel.app
 Repository: https://github.com/tareq7/sellerpilot-ai
-Demo video: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (2m38s, narrated real product screenshots; no live model inference claimed)
+Demo video: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (2m54s, narrated live product screens and genuine Meta Contributor playground output; full SellerPilot tool-call path remains gated)
 
 ## Submission checklist
 - [x] Video produced under 3 minutes with narration; verify the public deployment URL after its build finishes
-- [ ] Verify actual Meta API call if possible; do not assert live results otherwise
+- [x] Genuine Meta Contributor provider response confirmed via the official playground; SellerPilot gated tool-call endpoint remains unverified end-to-end.
 - [ ] Submit final written content and agree to sharing/terms only if covered by authorization
 - [ ] Capture confirmation receipt and final submitted URL

@@ -67,3 +67,7 @@ A genuine deployment defect was found and fixed: the original \`@hono/node-serve
 - All **50 tests** passed after the follow-up synthetic-only server-boundary fix in commit `cc0e565`.
 - The public `/api/agent` endpoint remains gated (HTTP 503 without server-only activation). A successful live authenticated model response has **not yet been demonstrated**, so this is still an integration readiness milestone rather than proof of hosted inference.
 - Meta screenshot confirms $150 free credits and S$0.00 balance, but Meta has no hard spending cap and a credit card is on file.
+
+## Real Meta Contributor provider verification — October 27, 2026
+
+The authenticated Meta Model API playground returned a genuine response from \`muse-spark-1.3-contributor\` to synthetic input: SKU TV85 has 10 days of inventory cover, 30-day replenishment lead time, and 7x ROAS. It correctly identified stockout as the highest-priority risk. The authentic screenshot is \`docs/assets/meta-contributor-playground.jpg\`. This verifies real Meta **provider** inference, **not** SellerPilot's separate private \`/api/agent\` tool-calling path. The production gate remains \`ALLOW_MODEL_CALLS=false\`. The final narrated video is **174.06 seconds** with H.264 video and AAC audio, 1280×720, and a provider-verification scene.

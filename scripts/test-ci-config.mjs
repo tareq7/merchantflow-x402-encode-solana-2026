@@ -2,22 +2,45 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 
-// Buildkite validates YAML on pipeline upload; this test enforces CI policy
-// without adding runtime packages or accepting commented-out shell commands.
+// This deliberately accepts one explicit verification command sequence only.
+// Conditional skips, arbitrary shell code, and deployment commands cannot pass.
 const source = readFileSync(new URL('../.buildkite/pipeline.yml', import.meta.url), 'utf8');
-const lines = source.split(/\r?\n/).map(line => line.trim())
-  .filter(line => line && !line.startsWith('#'));
+const expectedCommands = [
+  'set -eu',
+  'node -e "if (Number(process.versions.node.split(\'.\')[0]) < 22) process.exit(1)"',
+  'npm ci',
+  'node scripts/test-ci-config.mjs',
+  'npm test',
+  'npm run build',
+];
 
-test('SellerPilot CI is hosted, bounded, tested and never deploys', () => {
-  assert.ok(lines.includes('steps:'), 'Buildkite steps missing');
-  assert.equal(lines.filter(line => line.startsWith('- label:')).length, 1);
-  assert.ok(lines.includes('queue: linux-small'), 'Use verified Free hosted Linux Small queue');
-  assert.ok(lines.includes('timeout_in_minutes: 15'), 'Bound compute minutes per job');
-  for (const command of ['npm ci', 'node scripts/test-ci-config.mjs', 'npm test', 'npm run build']) {
-    assert.ok(lines.includes(command), `Missing real executable line: ${command}`);
-  }
-  for (const line of lines) {
-    assert.doesNotMatch(line, /\b(?:vercel|wrangler\s+deploy|npm\s+run\s+deploy|kubectl|aws\s+)/i,
-      'CI must not invoke production deployment commands');
+function verifyPipeline(yaml) {
+  const lines = yaml.split(/\r?\n/).filter((line) => line.trim() && !line.trimStart().startsWith('#'));
+  assert.equal(lines.filter((line) => /^\s*- label:/.test(line)).length, 1, 'One CI step only');
+  assert.ok(lines.some((line) => /^\s+queue: linux-small$/.test(line)), 'Use verified hosted Free queue');
+  assert.ok(lines.some((line) => /^\s+timeout_in_minutes: 15$/.test(line)), 'Bound minutes to 15');
+  const match = yaml.match(/^    command: \|\r?\n((?:^      [^\r\n]+\r?\n?)+)/m);
+  assert.ok(match, 'Require a single literal shell command block');
+  const commands = match[1].split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+  assert.deepEqual(commands, expectedCommands, 'Run exactly the reviewed non-deploy verification path');
+}
+
+test('SellerPilot CI must run strict hosted verification with enforced Node >=22', () => {
+  verifyPipeline(source);
+});
+
+test('conditional skip, fake test and alternative deployment commands fail policy', () => {
+  const injectionCases = [
+    ['npm test', 'if false; then npm test; fi'],
+    ['npm ci', 'echo npm ci'],
+    ['npm run build', 'npx wrangler pages deploy'],
+    ['npm run build', 'wrangler versions deploy'],
+    ['npm run build', 'vercel --prod'],
+    ['npm run build', 'npm run deploy'],
+    ['npm run build', 'npm run build\n      npx wrangler pages deploy'],
+  ];
+  for (const [before, after] of injectionCases) {
+    assert.throws(() => verifyPipeline(source.replace(before, after)),
+      undefined, `Mutation must be rejected: ${after}`);
   }
 });

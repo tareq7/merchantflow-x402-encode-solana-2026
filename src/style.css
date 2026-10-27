@@ -90,3 +90,8 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;ma
 .risk.critical{color:#9c2f28}
 .risk.high{color:#985013}
 .risk.medium{color:#7b6011}
+
+/* Final Lighthouse color-contrast corrections for tinted panel copy and links. */
+.big-signal p{color:#395c54}
+.highlight-row{color:#405d58}
+footer a{color:#08695b}

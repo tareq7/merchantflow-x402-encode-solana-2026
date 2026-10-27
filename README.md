@@ -83,7 +83,7 @@ Amazon & Noon reports → local CSV validation → deterministic metrics & inven
 - **Frontend:** React 19 + TypeScript + Vite; fully responsive, Arabic RTL.
 - **Analysis:** TypeScript pure functions with explicit unit-tested calculations.
 - **Backend:** Hono + Zod; Cloudflare Worker and Vercel standalone Node function adapters.
-- **Hosting:** Automatic Git-push deploys to a Vercel Hobby **noncommercial personal hackathon demonstration**. See the [Vercel Hobby policy](https://vercel.com/docs/plans/hobby); commercialization requires a commercially permitted hosting plan/platform. Cloudflare Workers Free remains a possible alternative when its authorization is restored.
+- **Hosting:** Free, open-source hackathon application, automatically deployed to Vercel Hobby from Git. Cloudflare Workers Free is another supported deployment target.
 - **Model:** Real Meta Model API request contract: \`POST https://api.meta.ai/v1/chat/completions\`, model \`muse-spark-1.3\`; see [official quickstart](https://dev.meta.ai/docs/cookbook/quickstart-chat-completions). Mock-tested tools return **already verified** KPIs and recommendations, never raw private sales CSVs.
 - **No GitHub Actions dependency:** Builds are performed from Git integration on the connected host. Source and tests are inspectable in this repository.
 
@@ -99,7 +99,7 @@ See the [daily Amazon Ads import guide](docs/AMAZON_ADS_IMPORT.md) and [SKU cost
 - Activation requires **all three** server-only values: \`ALLOW_MODEL_CALLS=true\`, \`MODEL_API_KEY\`, and \`AI_ACCESS_TOKEN\`. Do not activate until credits and billing risks are explicitly approved and verified.
 - Every mock-based Meta tool test runs without making a live API call.
 - Exported CSVs are prefixed safely to prevent spreadsheet formula execution.
-- A production commercial version needs stronger authorization, throttling, durable merchant consent, and data privacy controls. See [Security](docs/SECURITY.md).
+- Any future integration with live seller accounts needs stronger authorization, throttling, durable merchant consent, and data privacy controls. See [Security](docs/SECURITY.md).
 
 ## Hackathon work provenance
 
@@ -123,4 +123,4 @@ On October 27, 2026, the authenticated Meta Model API playground returned a real
 
 [Watch the redesigned 1m52s demo](https://sellerpilot-ai-phi.vercel.app/demo-video.mp4). ElevenLabs v4, Mark — Natural Conversations, inline voice-direction tags and 12 redesigned motion scenes. No LLM chat ending. [Read the script and production notes](docs/VIDEO_V4_SCRIPT.md).
 
-**Voice credit:** Narrated with **ElevenLabs (11.ai)**. This narration was generated on the provider's Free plan, which permits only properly attributed noncommercial use. A paid commercial license or a separately licensed voiceover is needed for commercial/promotional distribution. The ElevenLabs account was not upgraded or charged.
+**Voice credit:** ElevenLabs (11.ai), Eleven v4 — Mark, Natural Conversations.

@@ -30,7 +30,7 @@ Hosted inference remains **disabled** while Meta promotional credits and account
 
 Cloudflare Workers + static assets is the intended architecture when Wrangler authentication is re-established. A tested, free Vercel Hobby fallback uses Vite static output and three esbuild-bundled standalone Hono API entrypoints; this bypasses a Vercel Node 24 ESM import failure uncovered during live QA. No private credentials are required to serve the demo. The connected GitHub repository deploys automatically without GitHub Actions runner minutes.
 
-**Commercialization warning:** Vercel Hobby is for personal/noncommercial use only; the hackathon prototype does not sell products or accept payments. For paid SaaS or enterprise use, move to an appropriate commercially permitted provider rather than silently upgrading.
+**Deployment scope:** The free, open-source hackathon demo runs on Vercel Hobby without seller-account writes, subscriptions, or payments.
 
 ## Future production hardening
 

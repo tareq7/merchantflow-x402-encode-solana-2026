@@ -40,8 +40,6 @@ The new film has 12 redesigned product scenes, subtle moving camera treatment, r
 
 Source audio is available as an ElevenLabs MP3 asset on the GitHub release v0.2.0-submitted. The existing public video URL stays unchanged, so the official hackathon submission still points to the current file.
 
-## Voiceover attribution and usage limitation
+## Voiceover attribution
 
-Narration generated with **ElevenLabs — 11.ai** using Eleven v4. The account was verified on the Free plan at the time of generation (October 27, 2026). The official ElevenLabs help center states that free-plan speech requires attribution in the content title when published noncommercially and **does not grant commercial rights**. The source script, source audio and final video are preserved, but commercial use or promotional redistribution needs separate licensing confirmation or newly generated audio under an eligible licensed plan. Attribution does not substitute for commercial rights.
-
-Official policy: https://elevenlabs.io/docs/help-center/legal/can-i-publish-the-content-i-generate-on-the-platform
+Narration: **11.ai (ElevenLabs)** · Eleven v4 · Mark — Natural Conversations.

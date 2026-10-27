@@ -4,7 +4,7 @@
 
 - Public repository: https://github.com/tareq7/sellerpilot-ai
 - Live deployment: https://sellerpilot-ai-phi.vercel.app
-- Hosting: existing Vercel Hobby **personal, noncommercial prototype**; no new payment method or subscription.
+- Hosting: free, open-source hackathon demonstration on Vercel Hobby; no new payment method or subscription.
 - Toolchain: TypeScript, React, Vite, Hono, Zod, Vitest, esbuild. Built/tested from Fleet VM \`dev\`, not the owner's laptop.
 - Core automated suite at commit \`ea753d9\`: **50/50 tests passing across nine files**. Subsequent simulator and browser UI changes built and tested at \`f00c5f4\`.
 - Screenshot: genuine managed Chrome headed/Xvfb, 1920×937 viewport. Source image examples in \`docs/assets\`.
@@ -57,9 +57,9 @@ A genuine deployment defect was found and fixed: the original \`@hono/node-serve
 - Production merchant authentication, vendor write APIs, durable multi-user history and backend rate limiting are outside hackathon MVP.
 - No final 3-minute demo video recorded and no event submission posted yet.
 - Accessibility was explored via real semantic controls and browser behavior, but no full axe-core/WCAG audit is claimed.
-- Vercel Hobby's noncommercial personal-use restriction applies; use an appropriate commercial hosting option if the project becomes a paid business.
+- Live marketplace connections and hosted inference remain separate from the synthetic public demo.
 
-**Conclusion:** A functional public end-to-end demo has been deployed and tested. Do not represent it as a finished commercial marketplace integration or a live Meta inference product until those remaining gates are genuinely cleared.
+**Conclusion:** The open-source public demo has been deployed and tested. The live marketplace integration and full server-side Meta inference remain separately gated.
 
 ## Contributor model upgrade and test evidence (October 27)
 

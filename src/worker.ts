@@ -13,10 +13,10 @@ const positiveInt=finite.int();
 const ad=z.object({date:z.string().regex(/^\d{4}-\d{2}-\d{2}$/),marketplace:market,sku:z.string().min(1).max(96),campaign:z.string().min(1).max(96),impressions:positiveInt,clicks:positiveInt,orders:positiveInt,spendSar:finite,revenueSar:finite,unitCostSar:finite,unitsSold:positiveInt.optional(),source:z.enum(['canonical','amazon-advertised-product','noon-guided']).optional()}).strict();
 const stock=z.object({marketplace:market,sku:z.string().min(1).max(96),availableUnits:positiveInt,inboundUnits:positiveInt,avgDailyUnits:finite,leadTimeDays:finite}).strict();
 const body=z.object({ads:z.array(ad).max(2000),stocks:z.array(stock).max(2000)}).strict();
-const agentBody=body.extend({question:z.string().trim().min(2).max(600),locale:z.enum(['en','ar']).default('en')});
+const agentBody=body.extend({question:z.string().trim().min(2).max(600),locale:z.enum(['en','ar']).default('en'),datasetConsent:z.literal('synthetic-only')});
 const responseHeaders={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const getAnalysis=(ads:Ad[],stocks:Stock[])=>analyze(ads,stocks);
-app.get('/api/health',c=>c.json({ok:true,project:'SellerPilot AI',metaModel:'muse-spark-1.3',mode:c.env?.ALLOW_MODEL_CALLS==='true'?'opt-in':'demo-safe',timestamp:new Date().toISOString()},200,responseHeaders));
+app.get('/api/health',c=>c.json({ok:true,project:'SellerPilot AI',metaModel:'muse-spark-1.3-contributor',mode:c.env?.ALLOW_MODEL_CALLS==='true'?'opt-in':'demo-safe',timestamp:new Date().toISOString()},200,responseHeaders));
 app.post('/api/analyze',async c=>{
  const bytes=Number(c.req.header('content-length')||'0');
  if(bytes>500000)return c.json({error:'payload_too_large'},413,responseHeaders);
@@ -37,8 +37,8 @@ async function muse(analysis:Analysis,question:string,locale:'en'|'ar',key:strin
  {role:'user',content:'Question: '+question+'\nSource manifest (synthetic demo or user-imported aggregates): '+JSON.stringify(compact)}
  ];
  const callsUsed:string[]=[];let answer='';
- for(let turn=0;turn<3;turn++){
-  const response=await fetch(modelEndpoint,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'muse-spark-1.3',messages,tools,max_tokens:1100}),signal:AbortSignal.timeout(25000)});
+ for(let turn=0;turn<2;turn++){
+  const response=await fetch(modelEndpoint,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'muse-spark-1.3-contributor',messages,tools,max_tokens:400}),signal:AbortSignal.timeout(25000)});
   if(!response.ok)throw new Error('model_http_'+response.status);
   const result=await response.json() as {choices?:Array<{message?:{content?:string|null;tool_calls?:ToolCall[]}}>,usage?:unknown};
   const msg=result.choices?.[0]?.message;if(!msg)throw new Error('no_model_answer');
@@ -53,7 +53,7 @@ async function muse(analysis:Analysis,question:string,locale:'en'|'ar',key:strin
   }
  }
  if(!answer)throw new Error('model_did_not_finish');
- return {answer,model:'muse-spark-1.3',source:'Meta Model API',toolsUsed:[...new Set(callsUsed)],warnings:analysis.warnings.slice(0,2)};
+ return {answer,model:'muse-spark-1.3-contributor',source:'Meta Model API',toolsUsed:[...new Set(callsUsed)],warnings:analysis.warnings.slice(0,2)};
 }
 app.post('/api/agent',async c=>{
  const env=c.env??{};
@@ -66,6 +66,7 @@ app.post('/api/agent',async c=>{
  const input=agentBody.safeParse(await c.req.json().catch(()=>null));
  if(!input.success)return c.json({error:'invalid_contract'},400,responseHeaders);
  const {ads,stocks,question,locale}=input.data;
+ if(ads.some(a=>a.source==='noon-guided'||a.source==='amazon-advertised-product'))return c.json({error:'private_data_forbidden_on_contributor'},403,responseHeaders);
  if(ads.some(a=>a.clicks>a.impressions||a.orders>a.clicks))return c.json({error:'invalid_contract'},400,responseHeaders);
  try {
    const output=await muse(getAnalysis(ads,stocks),question,locale,env.MODEL_API_KEY);

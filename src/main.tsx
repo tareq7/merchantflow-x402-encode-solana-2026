@@ -102,8 +102,9 @@ export function App(){
    'هذا تحليل حسابي دون استدعاء نموذج: الأولوية الآن هي '+arabicKind[priority.kind]+' للمنتج '+priority.sku+'. الإنفاق قيد المراجعة '+money(report.summary.spendUnderReviewSar)+'. راجع الأدلة قبل اتخاذ القرار، ولا تتم أي تغييرات تلقائية.':
    'Deterministic analysis (not Meta AI): The highest-priority issue is '+priority.kind.replaceAll('_',' ').toLowerCase()+' for SKU '+priority.sku+' on '+priority.marketplace+'. Flagged campaign spend is '+money(report.summary.spendUnderReviewSar)+'. Review verified evidence before staging changes. No campaigns were changed.') : t('Import reports first.','استورد التقارير أولاً.');
   if(!metaMode){setAnswer(local);setAsking(false);return;}
+  if(source!=='synthetic'){setAnswer(t('Contributor mode uses synthetic data only. Restore demo to avoid submitting private reports to Meta.','وضع المساهم يقتصر على البيانات التجريبية. استعد العينة لتجنب إرسال تقاريرك الخاصة إلى ميتا.'));setAsking(false);return;}
   try{
-   const r=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json',...(token?{'Authorization':'Bearer '+token}:{})},body:JSON.stringify({ads,stocks,question:q,locale:ar?'ar':'en'})});
+   const r=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json',...(token?{'Authorization':'Bearer '+token}:{})},body:JSON.stringify({ads,stocks,question:q,locale:ar?'ar':'en',datasetConsent:'synthetic-only'})});
    const o=await r.json() as {answer?:string;error?:string;message?:string};
    if(!r.ok)throw Error(o.message||o.error||'Model unavailable');
    setAnswer(o.answer||'No answer available');

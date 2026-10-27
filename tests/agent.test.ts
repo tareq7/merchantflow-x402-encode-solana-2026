@@ -3,7 +3,7 @@ import {app} from '../src/worker';
 const env={ALLOW_MODEL_CALLS:'true',MODEL_API_KEY:'local-mock-only',AI_ACCESS_TOKEN:'local-test-token'};
 const ads=[{date:'2026-10-26',marketplace:'Amazon.sa',sku:'TV85',campaign:'Exact 85',impressions:1000,clicks:100,orders:8,spendSar:100,revenueSar:700,unitCostSar:100}];
 const stocks=[{marketplace:'Amazon.sa',sku:'TV85',availableUnits:1,inboundUnits:0,avgDailyUnits:2,leadTimeDays:12}];
-const payload=JSON.stringify({ads,stocks,question:'What is the inventory risk?',locale:'en'});
+const payload=JSON.stringify({ads,stocks,question:'What is the inventory risk?',locale:'en',datasetConsent:'synthetic-only'});
 const request=(authorization='Bearer local-test-token')=>app.request('https://demo.test/api/agent',{method:'POST',headers:{'content-type':'application/json',authorization},body:payload},env);
 afterEach(()=>vi.unstubAllGlobals());
 describe('Meta Muse tool orchestration — zero live spending',()=>{
@@ -18,7 +18,7 @@ describe('Meta Muse tool orchestration — zero live spending',()=>{
   vi.stubGlobal('fetch',fetch);
   const result=await request();expect(result.status).toBe(200);
   const json=await result.json() as {model:string;toolsUsed:string[];answer:string;source:string};
-  expect(json.model).toBe('muse-spark-1.3');expect(json.source).toBe('Meta Model API');
+  expect(json.model).toBe('muse-spark-1.3-contributor');expect(json.source).toBe('Meta Model API');
   expect(json.toolsUsed).toContain('get_verified_kpis');
   expect(fetch).toHaveBeenCalledTimes(2);
   const [url,options]=fetch.mock.calls[0] as [string,{body:string;headers:Record<string,string>}];

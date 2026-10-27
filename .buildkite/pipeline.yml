@@ -3,9 +3,11 @@
 steps:
   - label: ":test_tube: SellerPilot tests and production build"
     key: verify
+    timeout_in_minutes: 15
     command: |
       node --version
       npm ci
+      node scripts/test-ci-config.mjs
       npm test
       npm run build
     agents:

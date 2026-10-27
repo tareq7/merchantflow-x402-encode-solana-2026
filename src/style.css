@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
 :root{font-family:'DM Sans','Manrope',system-ui,-apple-system,sans-serif;color:#152a33;background:#f5f8f8;font-synthesis:none}*{box-sizing:border-box}html{min-width:320px}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}a{color:inherit;text-decoration:none}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #31b49a;outline-offset:2px}[dir=rtl]{font-family:'IBM Plex Sans Arabic','DM Sans',sans-serif}button{border:0}.app{display:flex;min-height:100vh}
 .sidebar{width:260px;flex:0 0 260px;background:#071b23;color:#c1d3d5;display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;border-inline-end:1px solid #1a323b;z-index:50}
 .brand{padding:33px 23px 31px;display:flex;gap:11px;align-items:center}.brand-mark{width:39px;height:39px;border-radius:11px;background:linear-gradient(135deg,#52dabc,#189783);color:#062a2c;display:grid;place-items:center;box-shadow:0 4px 23px #1ac0a220}.brand strong{font-family:'Manrope',sans-serif;font-size:19px;letter-spacing:-.7px;color:#f3fbf8;display:block;white-space:nowrap}.brand strong em{font-style:normal;color:#54dab9}.brand small{font-size:8px;letter-spacing:1.4px;font-weight:800;color:#799aa0;display:block;margin-top:4px}.nav-label{font-size:10px;font-weight:800;letter-spacing:1.5px;padding:0 26px;margin:9px 0 15px;color:#5b7e85}.account{display:flex;align-items:center;gap:9px;margin:0 16px 34px;padding:11px 10px;background:#122c34;border:1px solid #254048;border-radius:11px}.account-mark{height:37px;width:37px;display:grid;place-items:center;flex:none;border-radius:9px;background:#2e565d;color:#daf6ef;font-weight:800;font-size:12px}.account span{min-width:0;flex:1}.account strong{display:block;color:#f2f8f7;font-size:10px;letter-spacing:.15px;white-space:nowrap}.account small{font-size:10px;color:#8ea8ae;display:block;margin-top:4px}.sidebar nav{display:flex;flex-direction:column;gap:4px;padding:0 12px}.sidebar nav button{background:transparent;color:#9cbbc0;font-weight:600;text-align:start;display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:10px;font-size:12px;min-height:45px;transition:background .15s,color .15s}.sidebar nav button:hover{background:#16323a;color:white}.sidebar nav button.active{background:#1b3b42;color:#7aebce;box-shadow:inset 3px 0 #4edbb5}.sidebar nav button span{flex:1}.sidebar nav button b{background:#2c575c;border-radius:6px;color:#c3f7e9;padding:3px 6px;font-size:10px}.side-bottom{margin-top:auto;padding:15px 16px 24px}.privacy{border:1px solid #1f4348;background:linear-gradient(130deg,#133238,#0e272e);border-radius:12px;padding:15px 11px;display:flex;align-items:flex-start;gap:10px;color:#4ad8b6}.privacy div{flex:1}.privacy strong{font-size:11px;color:#d7f4eb;display:block}.privacy small{font-size:10px;color:#8daaad;display:block;margin-top:6px;line-height:1.5}.side-bottom>p{display:flex;align-items:center;gap:8px;color:#688c92;font-weight:800;font-size:9px;letter-spacing:1px;padding:15px 9px 0;margin:0}.side-bottom>p span{margin-inline-start:auto;color:#4e6e74}.green-dot{display:inline-block;width:7px;height:7px;flex:none;background:#5adbb4;border-radius:100%;box-shadow:0 0 0 4px #44bc9622}
@@ -70,3 +69,24 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;ma
 .noon-confirm{display:flex;align-items:center;gap:20px;margin:20px 0;flex-wrap:wrap}.noon-confirm>label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:#526984}.noon-confirm>.noon-verify{flex-direction:row;align-items:center;max-width:440px;line-height:1.5}
 .noon-verify input{accent-color:#6d70be}
 @media(max-width:960px){.noon-map{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){.noon-files,.noon-map{grid-template-columns:1fr}.noon-import{padding:18px}}
+
+
+/* Accessible text and action contrast. Avoid render-blocking external fonts. */
+:root{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+[dir=rtl]{font-family:Tahoma,"Segoe UI",Arial,sans-serif}
+.brand strong,.page-heading h1,.hero h2,.section-title h2,.panel h3,.upload h3,.metric>strong,.native-head h3,.noon-import>h3,.copilot-hero h2,.quality-heading h3,.evidence strong,.big-signal>strong{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.page-heading p,.section-title p,.metric>small,.metric>div,.channel-bottom,.footnote,.opp-meta>span:nth-child(2),.score,.opp p,.opp-foot,.opp-foot small,.intro p,.upload p,.upload small,.contract p,.contract small,.disclosures p,.copilot-hero p,.drawer-intro,.quality-heading p,.quality-foot span,.native-head p,.native-disclaimer,.noon-import>p,footer{color:#50676b}
+.eyebrow,.micro,.panel-link,.plain-link,.opp-foot button{color:#0a6c5d}
+.tag{color:#355e5c;background:#e8f1ef}
+.primary{background:#087665;color:#fff}
+.primary:hover{background:#075d53}
+.hero .hero-label{color:#a2f4db}
+.metric>div svg{opacity:.95}
+.sidebar .nav-label{color:#93b0b5}
+.quality-score>span,.quality-item p{color:#47695f}
+.suggestions button,.secondary{color:#355b54}
+.native-fields small,.noon-files label,.noon-map label{color:#435a6b}
+.mode button{color:#43635c}
+.risk.critical{color:#9c2f28}
+.risk.high{color:#985013}
+.risk.medium{color:#7b6011}

@@ -12,7 +12,7 @@ class ManagedBuildkite(unittest.TestCase):
         self.assertIsInstance(config["steps"], list)
         self.assertEqual(len(config["steps"]), 1)
         step = config["steps"][0]
-        self.assertEqual(step["agents"]["queue"], "default")
+        self.assertEqual(step["agents"]["queue"], "linux-small")
         commands = step["command"]
         for expected in ("npm ci", "npm test", "npm run build"):
             self.assertIn(expected, commands)

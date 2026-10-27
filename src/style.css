@@ -95,3 +95,8 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;ma
 .big-signal p{color:#395c54}
 .highlight-row{color:#405d58}
 footer a{color:#08695b}
+
+/* Desktop-only navigation contrast verified by Lighthouse selectors. */
+.sidebar .side-bottom>p span{color:#aec5c8}
+.topbar>div:first-child{color:#4d6267}
+.environment{color:#365f58}

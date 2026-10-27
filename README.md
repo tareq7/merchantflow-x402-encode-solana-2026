@@ -21,3 +21,17 @@ An ad campaign can have great ROAS and still be a terrible business decision whe
 ## Status
 
 In active development; initial foundation committed first for transparent iteration history.
+
+## Reproducible verification
+
+\`\`\`sh
+npm ci
+npm test
+npm run build
+\`\`\`
+
+The React interface imports real, synthetic Amazon/Noon reports locally in the browser. Two hosting paths are supported: Cloudflare Workers Assets (wrangler.toml) and Vercel Hobby (Vite SPA + server-side Hono API functions). Both default to an inactive Meta API. No model calls or marketplace actions are made in the public demo.
+
+## Live hosted API safeguards
+
+The \`/api/analyze\` route is deterministic. \`/api/agent\` returns 503 until an operator explicitly configures \`ALLOW_MODEL_CALLS=true\` with server-only \`MODEL_API_KEY\` and \`AI_ACCESS_TOKEN\`. **Hackathon credits must be confirmed before any enabled model use**; this flag is deliberately false for the demo deployment. No billing accounts or payment cards are changed.

@@ -13,6 +13,7 @@
     "preview": "wrangler dev"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.5",
     "hono": "^4.13.13",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",

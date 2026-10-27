@@ -1,0 +1,21 @@
+# SellerPilot CI only. No Vercel or Cloudflare production deployments.
+# Targets the verified Free-plan Buildkite-hosted Small Linux queue.
+steps:
+  - label: ":test_tube: SellerPilot tests and production build"
+    key: verify
+    timeout_in_minutes: 15
+    concurrency: 1
+    concurrency_group: sellerpilot/ci-verification
+    concurrency_method: ordered
+    retry:
+      manual: false
+      automatic: false
+    command: |
+      set -eu
+      node -e "if (Number(process.versions.node.split('.')[0]) < 22) process.exit(1)"
+      npm ci
+      node scripts/test-ci-config.mjs
+      npm test
+      npm run build
+    agents:
+      queue: linux-small

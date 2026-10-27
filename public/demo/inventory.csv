@@ -1,10 +1,10 @@
 marketplace,sku,available_units,inbound_units,avg_daily_units,lead_time_days
-Amazon.sa,TV85-FLAT,39,90,8.5,12
-Amazon.sa,TV65-FLAT,860,160,11,8
+Amazon.sa,TV85-FLAT,39,90,35,12
+Amazon.sa,TV65-FLAT,1100,160,50,8
 Amazon.sa,TV50-FLAT,440,90,5.2,9
-Amazon.sa,TV100-FLAT,0,30,1.9,24
-Noon.sa,TV75-FLAT,310,120,7.8,8
-Noon.sa,TV85-FLAT,58,60,6.2,14
+Amazon.sa,TV100-FLAT,0,30,14,24
+Noon.sa,TV75-FLAT,500,120,29,8
+Noon.sa,TV85-FLAT,58,60,15,14
 Noon.sa,TV43-FLAT,210,100,4,9
-Noon.sa,TV98-FLAT,92,45,1.7,22
-Amazon.sa,TV55-CURVE,320,90,3.2,14
+Noon.sa,TV98-FLAT,92,45,7,22
+Amazon.sa,TV55-CURVE,320,90,17,14

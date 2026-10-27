@@ -1,36 +1,44 @@
-# Meta Hackathon submission checklist
+# Meta Global AI Developer Hackathon — submitted checklist
 
-Event: https://cerebralvalley.ai/e/meta-ai-developer-hackathon/details
+**Status: OFFICIALLY SUBMITTED AND VERIFIED — October 27, 2026.**
+
+Cerebral Valley displayed **Project Submitted**, then **View Submission**, and an authenticated reopen confirmed that the saved entry displays all the correct fields. [Submission confirmation record](SUBMISSION_CONFIRMED.md).
 
 **Deadline:** November 4, 2026, 9:00 PM US Eastern Time (November 5, 04:00 Jerusalem/Gaza time).
 
-| Judging rubric | Weight | Evidence |
+| Judging criterion | Weight | Submitted evidence |
 |---|---:|---|
-| Impact | 30% | Inventory-aware decisions reduce commercially harmful stockouts and waste |
-| Meta AI tooling | 25% | Implemented Muse Spark 1.3 tool-calling code and mock tests; **real model proof pending** |
-| Technical depth & execution | 20% | Schema validation, deterministic audited calculations, dual-market fixtures, safe app packaging, 32 tests |
-| Demo | 25% | Public six-screen bilingual demo and shot list; **final 3-minute video pending** |
+| Impact | 30% | Inventory-aware ad-spend risk, stockout protection, bilingual merchant experience |
+| Meta AI Tooling | 25% | Real authenticated `muse-spark-1.3-contributor` provider response; read-only tool-calling code mock-tested, public route still gated |
+| Technical Depth | 20% | Validated Amazon & guided Noon CSV imports, deterministic stock/advertising engine, simulation, action approval, 50 Vitest tests |
+| Demo | 25% | 174.06-second narrated video with authentic product screenshots and Meta provider output |
 
-## Mandatory submission fields
+## Submission fields — all completed
 
-- [ ] Final team name: **SellerPilot AI** (working name; available for change before submission)
-- [x] Startup Track → Build for Your World.
-- [x] Public repository: https://github.com/tareq7/sellerpilot-ai
-- [x] Working application: https://sellerpilot-ai-phi.vercel.app
-- [ ] Final polished project description explaining new work during hackathon.
-- [x] A shareable 2m54s narrated product walkthrough: https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 (Meta inference explicitly not verified).
-- [ ] Explain exactly how Meta models were used, distinguish live and mocked testing.
-- [ ] Explain why Meta models are essential rather than generic inference.
-- [ ] Confirm the submission form's promotional-sharing consent explicitly at submission, and submit the final form.
-- [ ] Check that the submission receipt was actually confirmed.
+- [x] Team: **SellerPilot AI**.
+- [x] Track: **Startups Track**.
+- [x] Problem: **Build for Your World**.
+- [x] Public GitHub: https://github.com/tareq7/sellerpilot-ai
+- [x] Live demo: https://sellerpilot-ai-phi.vercel.app
+- [x] Video (174.06 seconds): https://sellerpilot-ai-phi.vercel.app/demo-video.mp4
+- [x] Final project description: accurately explains the stock-aware Arabic/English product, Amazon+Noon data, privacy and approvals.
+- [x] Meta Model API description: separates real provider inference from the **unverified live SellerPilot tool orchestration**.
+- [x] Why Meta is important: bilingual explanation and bounded read-only tool decisions grounded by deterministic calculation.
+- [x] Optional Meta feedback completed.
+- [x] Promotional-sharing checkbox accepted on the submission form.
+- [x] Official **Submit** clicked; **Project Submitted** notification confirmed.
+- [x] Entry re-opened in **Your Submission**; persisted fields and Update Project control confirmed.
 
-## External dependencies / billing
+## Credit, privacy and safety posture
 
-- [x] Requested Meta $150 promo credits.
-- [ ] Confirm credits have appeared in Meta billing, then separately determine whether a payment method is required to make calls.
-- [ ] Obtain explicit permission before attaching a payment card, activating a subscription, or accepting charges. No automated paid fallback.
-- [ ] If real hosted inference remains impossible, the final submission must explicitly disclose the limitation.
+- [x] User's Meta billing screenshot confirmed $150 free credits active, current balance S$0.00, and existing payment card.
+- [x] Authenticated Meta Model API playground returned a genuine Contributor-model answer on synthetic data.
+- [x] Vercel stores production `MODEL_API_KEY` and `AI_ACCESS_TOKEN` encrypted; public `ALLOW_MODEL_CALLS=false`.
+- [x] No full application API inference or real marketplace writes falsely claimed.
+- [x] Official hackathon submission and public video are complete **without adding a payment card or purchasing subscriptions**.
 
-**Do not claim hackathon submission, live Muse API usage, or credit allocation based solely on code, mock tests or confirmation of a credit-request form.**
+## Post-submission QA
 
-- [x] Real Meta Contributor inference confirmed in official playground. Production app tool loop remains private and mock-tested.
+See [QA report](QA_REPORT.md) and [submission confirmation](SUBMISSION_CONFIRMED.md) for verified browser interactions, build/test results, video encoding and Lighthouse checks. New website refinements can still deploy from GitHub; the submission already exists.
+
+**Do not claim production Muse tool-calling is live. The actual provider was verified via its authenticated official playground only.**

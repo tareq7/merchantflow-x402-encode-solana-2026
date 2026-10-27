@@ -6,7 +6,7 @@
 - Live deployment: https://sellerpilot-ai-phi.vercel.app
 - Hosting: existing Vercel Hobby **personal, noncommercial prototype**; no new payment method or subscription.
 - Toolchain: TypeScript, React, Vite, Hono, Zod, Vitest, esbuild. Built/tested from Fleet VM \`dev\`, not the owner's laptop.
-- Core automated suite at commit \`ea753d9\`: **32/32 tests passing across seven files**. Subsequent simulator and browser UI changes built and tested at \`f00c5f4\`.
+- Core automated suite at commit \`ea753d9\`: **50/50 tests passing across nine files**. Subsequent simulator and browser UI changes built and tested at \`f00c5f4\`.
 - Screenshot: genuine managed Chrome headed/Xvfb, 1920×937 viewport. Source image examples in \`docs/assets\`.
 
 ## Verified production HTTP behaviors
@@ -60,3 +60,10 @@ A genuine deployment defect was found and fixed: the original \`@hono/node-serve
 - Vercel Hobby's noncommercial personal-use restriction applies; use an appropriate commercial hosting option if the project becomes a paid business.
 
 **Conclusion:** A functional public end-to-end demo has been deployed and tested. Do not represent it as a finished commercial marketplace integration or a live Meta inference product until those remaining gates are genuinely cleared.
+
+## Contributor model upgrade and test evidence (October 27)
+
+- `muse-spark-1.3-contributor` is configured in source, rebuilt and pushed to `main` in commit `5d1c0f3`.
+- All **50 tests** passed after the follow-up synthetic-only server-boundary fix in commit `cc0e565`.
+- The public `/api/agent` endpoint remains gated (HTTP 503 without server-only activation). A successful live authenticated model response has **not yet been demonstrated**, so this is still an integration readiness milestone rather than proof of hosted inference.
+- Meta screenshot confirms $150 free credits and S$0.00 balance, but Meta has no hard spending cap and a credit card is on file.

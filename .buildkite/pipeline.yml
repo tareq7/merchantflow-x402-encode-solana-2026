@@ -5,7 +5,8 @@ steps:
     key: verify
     timeout_in_minutes: 15
     command: |
-      node --version
+      set -eu
+      node -e "if (Number(process.versions.node.split('.')[0]) < 22) process.exit(1)"
       npm ci
       node scripts/test-ci-config.mjs
       npm test

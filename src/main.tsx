@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {Activity,BarChart3,ChevronRight,CloudUpload,Database,Globe,LayoutDashboard,Menu,ShieldCheck,Sparkles,Target,TriangleAlert,X,Zap} from 'lucide-react';
 import {analyze,type Ad,type Stock,type Opportunity,type Market} from './domain/engine';
 import {parseAds,parseStock,toCsv} from './domain/csv';
+import {auditReports} from './domain/data-quality';
 import {Dashboard,Radar,Campaigns,Actions,DataLab,Copilot,DetailDrawer,type ViewProps} from './views';
 import './style.css';
 
@@ -39,6 +40,7 @@ export function App(){
  useEffect(()=>{document.documentElement.dir=ar?'rtl':'ltr';document.documentElement.lang=ar?'ar':'en';},[ar]);
  const report=useMemo(()=>analyze(market==='All'?ads:ads.filter(x=>x.marketplace===market),market==='All'?stocks:stocks.filter(x=>x.marketplace===market)),[ads,stocks,market]);
  const opportunities=report.opportunities, approved=opportunities.filter(x=>staged[x.id]);
+ const quality=useMemo(()=>auditReports(ads,stocks),[ads,stocks]);
  const current=nav.find(n=>n.id===page)!;
  const navigate=(where:Page)=>{setPage(where);setMobile(false);window.scrollTo({top:0,behavior:'smooth'});};
  async function upload(f:File|undefined,kind:'ads'|'stocks'){
@@ -46,7 +48,15 @@ export function App(){
   try{
    if(f.size>600000)throw Error('CSV exceeds 600 KB limit');
    const csv=await f.text();
-   if(kind==='ads')setAds(parseAds(csv));else setStocks(parseStock(csv));
+   if(kind==='ads'){
+    const parsed=parseAds(csv);
+    if(source==='synthetic')setStocks([]);
+    setAds(parsed);
+   }else{
+    const parsed=parseStock(csv);
+    if(source==='synthetic')setAds([]);
+    setStocks(parsed);
+   }
    setSource('imported');setStaged({});setError('');
   }catch(e){setError(e instanceof Error?e.message:String(e));}
  }
@@ -57,7 +67,7 @@ export function App(){
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const anchor=document.createElement('a');anchor.href=url;anchor.download='sellerpilot-staged-proposals.csv';anchor.click();URL.revokeObjectURL(url);
  }
- function toggle(a:Opportunity){setStaged(prev=>({...prev,[a.id]:!prev[a.id]}));}
+ function toggle(a:Opportunity){if(quality.blockers>0){setError('Resolve blocking data-quality issues before staging proposals.');return;}setStaged(prev=>({...prev,[a.id]:!prev[a.id]}));}
  async function ask(q=question){
   if(!q.trim())return;setQuestion(q);setAsking(true);setAnswer('');
   const priority=report.opportunities[0];
@@ -74,7 +84,7 @@ export function App(){
   finally{setAsking(false);}
  }
  const view:ViewProps={
-  ar,t,report,market,navigate,open:setSelected,approved,staged,toggle,exportApproved,
+  ar,t,report,market,quality,navigate,open:setSelected,approved,staged,toggle,exportApproved,
   ads,stocks,source,loadDemo,upload,adsInput,stockInput,
   question,setQuestion,answer,asking,metaMode,setMetaMode,token,setToken,ask
  };

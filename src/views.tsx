@@ -2,9 +2,9 @@ import React,{useState} from 'react';
 import {Activity,ArrowDownToLine,ArrowRight,ArrowUpRight,BarChart3,Check,CloudUpload,Database,FileText,LockKeyhole,Package,ShieldCheck,Sparkles,Target,TriangleAlert,X} from 'lucide-react';
 import type {Ad,Stock,Opportunity,Analysis,Market} from './domain/engine';
 import {simulateSpendChange} from './domain/simulator';
-import {auditReports} from './domain/data-quality';
+import {auditReports,type QualityReport} from './domain/data-quality';
 export type ViewProps={
- ar:boolean;t:(en:string,arabic:string)=>string;report:Analysis;market:'All'|Market;
+ ar:boolean;t:(en:string,arabic:string)=>string;report:Analysis;market:'All'|Market;quality:QualityReport;
  navigate:(id:'overview'|'radar'|'campaigns'|'actions'|'data'|'copilot')=>void;
  open:(x:Opportunity)=>void;approved:Opportunity[];staged:Record<string,boolean>;
  toggle:(x:Opportunity)=>void;exportApproved:()=>void;
@@ -60,10 +60,11 @@ export function Dashboard(p:ViewProps){
 }
 export function Radar(p:ViewProps){return <><InsightHeader p={p}/><div className="section-title"><h2>{p.report.opportunities.length} {p.t('signals found','إشارات مكتشفة')}</h2><span className="tag">{p.t('Risk-ranked','مرتبة حسب الخطورة')}</span></div><div className="opps">{p.report.opportunities.map(o=><OpportunityCard key={o.id} item={o} ar={p.ar} t={p.t} open={p.open}/>)}</div></>;}
 export function Campaigns(p:ViewProps){return <><InsightHeader p={p}/><div className="table-wrap"><table><thead><tr>{[p.t('CAMPAIGN · SKU','الحملة والمنتج'),p.t('MARKETPLACE','السوق'),p.t('SPEND','الإنفاق'),p.t('REVENUE','الإيرادات'),'ROAS','ACoS',p.t('STOCK COVER','تغطية المخزون'),p.t('CONTRIBUTION*','مساهمة تقديرية*')].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{p.report.campaigns.map(c=><tr key={c.id}><td><strong>{c.campaign}</strong><small>{c.sku}</small></td><td>{c.marketplace}</td><td>{money(c.spendSar)}</td><td>{money(c.revenueSar)}</td><td><strong className={(c.roas??0)<2.5?'negative':'positive'}>{num(c.roas,'×')}</strong></td><td>{num(c.acosPct,'%')}</td><td><span className={c.daysOfCover!==null&&c.leadTimeDays!==null&&c.daysOfCover<c.leadTimeDays+3?'short-cover':''}>{num(c.daysOfCover,'d')}</span></td><td>{money(c.contributionSar)}</td></tr>)}</tbody></table></div><p className="footnote">* {p.t('Estimated contribution, NOT net profit. Excludes platform fees, taxes, returns and overhead.','المساهمة تقديرية وليست صافي الربح، دون العمولات والضرائب والمرتجعات.')}</p></>;}
-export function Actions(p:ViewProps){const {report,t,ar,approved,staged}=p;return <>
+export function Actions(p:ViewProps){const {report,t,ar,approved,staged}=p;const blocked=p.quality.blockers>0;return <>
  <div className="intro"><ShieldCheck size={25}/><div><strong>{t('Nothing is changed without you.','لا يحدث أي تغيير دون موافقتك.')}</strong><p>{t('Inspect evidence, stage proposals and export a human-readable file. No live Amazon or Noon writes.','تحقق من الأدلة، ثم اعتمد المقترحات وصدّر ملفاً. لا توجد تعديلات مباشرة على أمازون أو نون.')}</p></div></div>
- <div className="action-summary"><div><small>{t('PROPOSALS','المقترحات')}</small><strong>{report.opportunities.length}</strong></div><div><small>{t('STAGED FOR EXPORT','معتمدة للتصدير')}</small><strong>{approved.length}</strong></div><button className="primary" onClick={p.exportApproved} disabled={!approved.length}><ArrowDownToLine size={16}/>{t('Export staged CSV','تصدير المقترحات')}</button></div>
- <div className="actions-list">{report.opportunities.map(o=><article key={o.id}><div><Pill s={o.severity}/><h3>{ar?arTitle[o.kind]:o.title}</h3><small>{o.marketplace} · {o.sku} · {o.campaign}</small></div><div className="action-buttons"><button className="secondary" onClick={()=>p.open(o)}>{t('Evidence','الأدلة')}</button><button className={'approval '+(staged[o.id]?'approved':'')} onClick={()=>p.toggle(o)}>{staged[o.id]?<><Check size={16}/>{t('Staged','معتمد')}</>:t('Stage proposal','اعتماد المقترح')}</button></div></article>)}</div>
+ {blocked&&<div className="quality-blocked"><TriangleAlert size={18}/>{t('Resolve all blocking report-quality issues before staging or exporting a decision.','عالج أخطاء جودة البيانات المانعة قبل اعتماد أو تصدير أي قرار.')}</div>}
+ <div className="action-summary"><div><small>{t('PROPOSALS','المقترحات')}</small><strong>{report.opportunities.length}</strong></div><div><small>{t('STAGED FOR EXPORT','معتمدة للتصدير')}</small><strong>{approved.length}</strong></div><button className="primary" onClick={p.exportApproved} disabled={!approved.length||blocked}><ArrowDownToLine size={16}/>{t('Export staged CSV','تصدير المقترحات')}</button></div>
+ <div className="actions-list">{report.opportunities.map(o=><article key={o.id}><div><Pill s={o.severity}/><h3>{ar?arTitle[o.kind]:o.title}</h3><small>{o.marketplace} · {o.sku} · {o.campaign}</small></div><div className="action-buttons"><button className="secondary" onClick={()=>p.open(o)}>{t('Evidence','الأدلة')}</button><button disabled={blocked} className={'approval '+(staged[o.id]?'approved':'')} onClick={()=>p.toggle(o)}>{staged[o.id]?<><Check size={16}/>{t('Staged','معتمد')}</>:t('Stage proposal','اعتماد المقترح')}</button></div></article>)}</div>
  </>;}
 export function DataLab(p:ViewProps){const {t,ads,stocks,source}=p;
  const quality=auditReports(ads,stocks);
@@ -125,5 +126,5 @@ export function DetailDrawer({item,close,...p}:ViewProps&{item:Opportunity;close
   <p className="scenario-caveat">{p.t('Illustration only: assumes unchanged ROAS, proportional attribution and no organic cannibalization. Not a forecast or recommended bid.','للتوضيح فقط: يفترض ثبات العائد ونسبة الطلبات دون قياس تأثير الطلب العضوي. ليس توقعاً أو توصية بسعر المزايدة.')}</p>
  </section>}
  <div className="proposal"><span className="micro">{p.t('PROPOSED HUMAN ACTION','إجراء مقترح للبائع')}</span><p>{p.ar?'راجع المقترح بنفسك، ولا يتم تنفيذه تلقائياً.':item.proposedAction}</p></div>
- <div className="drawer-actions"><button className="secondary" onClick={close}>{p.t('Close','إغلاق')}</button><button className="approval" onClick={()=>{p.toggle(item);close();p.navigate('actions');}}>{p.staged[item.id]?p.t('Remove from staged','إلغاء الاعتماد'):p.t('Stage for export','اعتماد للتصدير')} <ArrowRight size={16}/></button></div>
+ <div className="drawer-actions"><button className="secondary" onClick={close}>{p.t('Close','إغلاق')}</button><button disabled={p.quality.blockers>0} className="approval" onClick={()=>{p.toggle(item);close();p.navigate('actions');}}>{p.staged[item.id]?p.t('Remove from staged','إلغاء الاعتماد'):p.t('Stage for export','اعتماد للتصدير')} <ArrowRight size={16}/></button></div>
  </aside></div>;}

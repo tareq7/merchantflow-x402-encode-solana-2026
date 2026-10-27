@@ -48,3 +48,4 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:14px;ma
 .quality-item.blocker{color:#a9433b;background:#fff2ef;border-color:#f8d1cb}.quality-item.info{color:#527e89;background:#eef8fa;border-color:#dcecef}
 .quality-item strong{display:block;font-size:11px}.quality-item p{font-size:10px;line-height:1.6;margin:5px 0 0;color:#7e8581}
 @media(max-width:570px){.quality-heading{align-items:flex-start}.quality-heading h3{font-size:15px}.quality-score{padding:9px}.quality-score strong{font-size:22px}.quality-foot{gap:12px;flex-wrap:wrap}}
+.quality-blocked{display:flex;align-items:center;gap:11px;background:#fff1ed;color:#9e4f43;border:1px solid #f1ccc5;padding:14px 16px;border-radius:10px;font-size:12px;margin:0 0 18px}

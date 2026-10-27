@@ -8,7 +8,7 @@ Event: https://cerebralvalley.ai/e/meta-ai-developer-hackathon/details
 |---|---:|---|
 | Impact | 30% | Inventory-aware decisions reduce commercially harmful stockouts and waste |
 | Meta AI tooling | 25% | Implemented Muse Spark 1.3 tool-calling code and mock tests; **real model proof pending** |
-| Technical depth & execution | 20% | Schema validation, deterministic audited calculations, dual-market fixtures, safe app packaging, 25+ tests |
+| Technical depth & execution | 20% | Schema validation, deterministic audited calculations, dual-market fixtures, safe app packaging, 32 tests |
 | Demo | 25% | Public six-screen bilingual demo and shot list; **final 3-minute video pending** |
 
 ## Mandatory submission fields

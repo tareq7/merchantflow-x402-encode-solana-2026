@@ -27,10 +27,12 @@ A campaign showing 7× ROAS can be **bad for a business if the advertised SKU ru
 | Deterministic analysis API | Working | Auth-free \`POST /api/analyze\`, validated by Zod |
 | Meta Muse Spark 1.3 tool-calling pipeline | Implemented and mock-tested | Meta Chat Completions with structured read-only tool calls |
 | Live Meta Model API inference | **Disabled** | Waiting for awarded credits and explicit billing-safe activation; no live inference is claimed |
+| Data-trust monitoring | Working | Report freshness, duplicate grain, cost consistency and velocity checks |
 | Native vendor report adapters | Future work | Vendor exports must first be mapped into documented canonical columns |
 
 ![Opportunity radar in Arabic](docs/assets/radar-ar.jpg)
 ![Evidence drawer and what-if simulator](docs/assets/simulator-en.jpg)
+![Report quality and trust monitor](docs/assets/data-quality-en.jpg)
 
 ## Quickstart
 

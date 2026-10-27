@@ -6,7 +6,7 @@
 - Live deployment: https://sellerpilot-ai-phi.vercel.app
 - Hosting: existing Vercel Hobby **personal, noncommercial prototype**; no new payment method or subscription.
 - Toolchain: TypeScript, React, Vite, Hono, Zod, Vitest, esbuild. Built/tested from Fleet VM \`dev\`, not the owner's laptop.
-- Core automated suite at commit \`ea753d9\`: **25/25 tests passing across six files**. Subsequent simulator and browser UI changes built and tested at \`f00c5f4\`.
+- Core automated suite at commit \`ea753d9\`: **32/32 tests passing across seven files**. Subsequent simulator and browser UI changes built and tested at \`f00c5f4\`.
 - Screenshot: genuine managed Chrome headed/Xvfb, 1920×937 viewport. Source image examples in \`docs/assets\`.
 
 ## Verified production HTTP behaviors
@@ -33,6 +33,12 @@ A genuine deployment defect was found and fixed: the original \`@hono/node-serve
 - What-if slider accepted +15%; illustrative spend and constant-ROAS reference changed from SAR 1,980 / SAR 13,730 to SAR 2,277 / SAR 15,790. The stock risk warning remained visible.
 - Free copilot returned a **deterministic** response, clearly labeled "ZERO PAID CALLS".
 - Opt-in Meta mode returned a clear disabled-credit warning; no model inference was made.
+
+## Additional data trust acceptance
+
+- Seven data-quality tests cover stale/future reports, duplicate campaign-day grain, zero or inconsistent costs, missing inventory, and attributed-order velocity mismatches.
+- Live Data Lab showed **100/100 verified synthetic inputs**, zero blockers, zero warnings, latest sample date October 26, 2026. This score describes the supplied canonical sample only, not real marketplace exports.
+- GitHub screenshot: docs/assets/data-quality-en.jpg.
 
 ## Numeric / security acceptance tests
 

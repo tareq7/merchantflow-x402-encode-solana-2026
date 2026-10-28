@@ -45,3 +45,7 @@ The official form persisted the new **1789-character Project Description**, **13
 ## October 28 video revision
 
 The original submitted URL now serves an exactly 180-second Full-HD film with significantly larger real-product screens and 18 cinematic scenes. Original narration and appropriate 11.ai attribution remain. Details: VIDEO_3MIN_PRODUCTION.md.
+
+## October 28 final voice-only video replacement
+
+The existing submitted video URL has been updated in place to an exactly 180.000-second Full-HD film. Two newly generated ElevenLabs Eleven v4 voice segments provide continuous narration, including an immediate spoken introduction. No music, sound effects, ambient audio or long introductory silence are included. The opening and closing title-layer bugs were corrected, and UI captures are now displayed without destructive cropping. The links and seller-controlled application functionality are unchanged. A separate clean narration is available at https://sellerpilot-ai-phi.vercel.app/demo-voiceover.mp3.

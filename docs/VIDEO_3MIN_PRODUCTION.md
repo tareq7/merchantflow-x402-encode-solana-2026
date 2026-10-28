@@ -11,3 +11,7 @@ The same natural ElevenLabs Eleven v4 Mark narration (107.729 seconds) is kept a
 QA: the master decoded exactly 4,320 frames, duration 180.000000 seconds, no accidental black intervals >=2 seconds, and valid AAC stereo audio. All financial scenarios use synthetic demo information. Meta Contributor's real playground response was verified separately; the app tool-call endpoint remains gated.
 
 To reproduce, read scripts/video-premium/README.md and download the production source archive attached to the GitHub release. The public URL is unchanged, so the existing hackathon entry links to this version.
+
+## October 28 definitive voice-only revision
+
+The current public video replaces the original music-backed production with a clean mono ElevenLabs v4 narration that spans exactly three minutes. There is no soundtrack, sound effect, background music, ambient bed or silent lead-in. The original UI captures are re-rendered without distortion or clipping. Missing intro/outro title layers are fixed. See [the current specification](VIDEO_VOICE_ONLY_FINAL.md); any prior references to music describe the historical version, not the current video.

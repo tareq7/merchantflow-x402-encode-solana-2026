@@ -12,3 +12,4 @@ coverage/
 .tools/
 api/_compiled.mjs
 .work-video/
+.work-production/

@@ -7,7 +7,7 @@
 **Problem statement:** Build for Your World  
 **Free, open-source repository:** https://github.com/tareq7/sellerpilot-ai  
 **Live application:** https://sellerpilot-ai-phi.vercel.app  
-**112-second revised demo:** https://sellerpilot-ai-phi.vercel.app/demo-video.mp4  
+**Exactly 180-second updated cinematic demo:** https://sellerpilot-ai-phi.vercel.app/demo-video.mp4  
 **Existing submission:** https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/3667016a-f10d-47aa-9da4-1a13902bd9cd/edit
 
 ## Project Description
@@ -18,7 +18,7 @@ SellerPilot is a free, open-source Arabic-English marketplace operations copilot
 
 The seller stays in control: inspect the evidence, stage a proposal and export an approval-marked CSV. SellerPilot never quietly changes campaigns. Data Lab imports daily Amazon Sponsored Products reports with separate cost and VAT inputs, plus guided column-by-column mapping for Noon exports. A data-trust monitor identifies stale or duplicated reports, missing stock and conflicting product costs, blocking unsafe approvals.
 
-Built during the hackathon in React, TypeScript, Vite, Hono and Zod, with responsive Arabic RTL support, 50 passing automated tests and Lighthouse accessibility of 100/100 on mobile and desktop. The new 112-second demo uses natural ElevenLabs v4 narration, 12 redesigned motion scenes and a seller-decision ending—not a generic LLM-chat scene. Public examples are synthetic.
+Built during the hackathon in React, TypeScript, Vite, Hono and Zod, with responsive Arabic RTL support, 50 passing automated tests and Lighthouse accessibility of 100/100 on mobile and desktop. The updated 180-second film uses natural ElevenLabs v4 narration and 18 cinematic scenes and a seller-decision ending—not a generic LLM-chat scene. Public examples are synthetic.
 
 Live demo: https://sellerpilot-ai-phi.vercel.app
 
@@ -41,3 +41,7 @@ We used ElevenLabs Eleven v4 (Mark – Natural Conversations) with restrained in
 ## Update verification
 
 The official form persisted the new **1789-character Project Description**, **1318-character Meta tooling description**, **709-character Why Meta answer**, and partner-technology answer after a fresh navigation. The same public video and GitHub URLs remained, and the Update Project button returned to disabled (no unsaved changes). No new project entry was created.
+
+## October 28 video revision
+
+The original submitted URL now serves an exactly 180-second Full-HD film with significantly larger real-product screens and 18 cinematic scenes. Original narration and appropriate 11.ai attribution remain. Details: VIDEO_3MIN_PRODUCTION.md.

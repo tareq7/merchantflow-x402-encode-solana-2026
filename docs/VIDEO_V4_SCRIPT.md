@@ -43,3 +43,7 @@ Source audio is available as an ElevenLabs MP3 asset on the GitHub release v0.2.
 ## Voiceover attribution
 
 Narration: **11.ai (ElevenLabs)** · Eleven v4 · Mark — Natural Conversations.
+
+## October 28 cinematic extension
+
+The existing 107.729-second ElevenLabs v4 narration remains unchanged inside the 180-second film. Additional screen-reading time comes from gaps at natural vocal breaks, accompanied by original music and full-width screen captures. See VIDEO_3MIN_PRODUCTION.md.

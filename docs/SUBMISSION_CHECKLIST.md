@@ -42,3 +42,7 @@ Cerebral Valley displayed **Project Submitted**, then **View Submission**, and a
 See [QA report](QA_REPORT.md) and [submission confirmation](SUBMISSION_CONFIRMED.md) for verified browser interactions, build/test results, video encoding and Lighthouse checks. New website refinements can still deploy from GitHub; the submission already exists.
 
 **Do not claim production Muse tool-calling is live. The actual provider was verified via its authenticated official playground only.**
+
+## Current linked film (October 28)
+
+The entry remains submitted, and its unchanged public video URL now serves the exactly 180-second Full-HD film. Any older runtimes above refer to previous edits. See VIDEO_3MIN_PRODUCTION.md.

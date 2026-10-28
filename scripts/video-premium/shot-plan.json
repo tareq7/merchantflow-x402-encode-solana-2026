@@ -1,0 +1,164 @@
+[
+  {
+    "index": 1,
+    "kind": "intro",
+    "section": "START WITH A BETTER DECISION",
+    "headline": "7\u00d7 ROAS ISN\u2019T THE WHOLE STORY",
+    "source": null,
+    "caption": "THE COST OF MISSING INVENTORY",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 2,
+    "kind": "ui",
+    "section": "THE PROBLEM",
+    "headline": "Your ad budget deserves context.",
+    "source": "01-command-center",
+    "caption": "An online store. Two marketplaces. Too many disconnected decisions.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 3,
+    "kind": "ui",
+    "section": "STRONG RESULTS",
+    "headline": "A great ROAS can hide a risk.",
+    "source": "08-campaigns",
+    "caption": "High advertising returns are only one part of a good decision.",
+    "accent": "#83caff"
+  },
+  {
+    "index": 4,
+    "kind": "ui",
+    "section": "THE BLIND SPOT",
+    "headline": "Advertising and stock rarely agree.",
+    "source": "04-radar",
+    "caption": "Look beyond the return on advertising spend.",
+    "accent": "#ffbb82"
+  },
+  {
+    "index": 5,
+    "kind": "risk",
+    "section": "STOCKOUT RISK",
+    "headline": "10 days of stock. 30 days to restock.",
+    "source": "05-evidence",
+    "caption": "A synthetic example: profitable ads can still create an inventory gap.",
+    "accent": "#ffbb82"
+  },
+  {
+    "index": 6,
+    "kind": "ui",
+    "section": "OUR APPROACH",
+    "headline": "One clear view of both.",
+    "source": "01-command-center",
+    "caption": "SellerPilot brings advertising results and inventory into focus.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 7,
+    "kind": "ui",
+    "section": "OPPORTUNITY RADAR",
+    "headline": "Start with what needs attention.",
+    "source": "04-radar",
+    "caption": "The highest-impact signals come first, with reasons you can inspect.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 8,
+    "kind": "focus",
+    "section": "EVIDENCE, NOT GUESSES",
+    "headline": "Every signal has a paper trail.",
+    "source": "05-evidence",
+    "caption": "Inspect SKU, inventory runway, ROAS and supplier lead times.",
+    "accent": "#83caff"
+  },
+  {
+    "index": 9,
+    "kind": "focus",
+    "section": "WHAT IF?",
+    "headline": "Test a change before you commit.",
+    "source": "07-simulator",
+    "caption": "Simulated spend changes are clearly marked as assumptions.",
+    "accent": "#ffbb82"
+  },
+  {
+    "index": 10,
+    "kind": "ui",
+    "section": "THE SIMULATOR",
+    "headline": "Read the numbers, not a prediction.",
+    "source": "07-simulator",
+    "caption": "A transparent scenario helps explain the trade-offs.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 11,
+    "kind": "ui",
+    "section": "APPROVAL STUDIO",
+    "headline": "Nothing changes without you.",
+    "source": "09-approval",
+    "caption": "Review the proposal and evidence before staging an action.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 12,
+    "kind": "ui",
+    "section": "YOU KEEP CONTROL",
+    "headline": "Stage it. Export it. Your call.",
+    "source": "10-staged",
+    "caption": "No silent campaign updates, no surprise bids.",
+    "accent": "#83caff"
+  },
+  {
+    "index": 13,
+    "kind": "focus",
+    "section": "AMAZON DATA",
+    "headline": "Use your real Sponsored Products CSV.",
+    "source": "12-amazon",
+    "caption": "Import report data with your own costs and explicit VAT treatment.",
+    "accent": "#ffbb82"
+  },
+  {
+    "index": 14,
+    "kind": "focus",
+    "section": "NOON DATA",
+    "headline": "Map the columns. No assumptions.",
+    "source": "13-noon",
+    "caption": "Noon report formats vary, so every required field is verified.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 15,
+    "kind": "ui",
+    "section": "DATA YOU CAN TRUST",
+    "headline": "Know when something is missing.",
+    "source": "11-data-quality",
+    "caption": "Quality checks block decisions when stock or costs are incomplete.",
+    "accent": "#83caff"
+  },
+  {
+    "index": 16,
+    "kind": "ui",
+    "section": "BUILT IN TWO LANGUAGES",
+    "headline": "Arabic and English. Fully supported.",
+    "source": "14-arabic-radar",
+    "caption": "Right-to-left layouts without sacrificing the underlying evidence.",
+    "accent": "#43e4c8"
+  },
+  {
+    "index": 17,
+    "kind": "meta",
+    "section": "MUSE SPARK 1.3",
+    "headline": "Reasoning over verified calculations.",
+    "source": "04-radar",
+    "caption": "Meta Contributor tested on synthetic data; app model API remains gated.",
+    "accent": "#83caff"
+  },
+  {
+    "index": 18,
+    "kind": "outro",
+    "section": "SELLERPILOT AI",
+    "headline": "SEE THE RISK. MAKE THE CALL.",
+    "source": "16-home-end",
+    "caption": "sellerpilot-ai-phi.vercel.app",
+    "accent": "#43e4c8"
+  }
+]

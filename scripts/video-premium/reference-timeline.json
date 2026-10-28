@@ -1,0 +1,143 @@
+{
+  "duration": 180,
+  "fps": 24,
+  "sampleRate": 48000,
+  "intro": 6.0,
+  "outro": 7.5,
+  "gapSizeSeconds": 3.918071,
+  "scenes": [
+    {
+      "scene": 1,
+      "originalStart": 0.0,
+      "originalEnd": 5.91,
+      "start": 6.0,
+      "speechEnd": 11.91
+    },
+    {
+      "scene": 2,
+      "originalStart": 5.91,
+      "originalEnd": 13.3,
+      "start": 15.828,
+      "speechEnd": 23.218
+    },
+    {
+      "scene": 3,
+      "originalStart": 13.3,
+      "originalEnd": 21.43,
+      "start": 27.136,
+      "speechEnd": 35.266
+    },
+    {
+      "scene": 4,
+      "originalStart": 21.43,
+      "originalEnd": 27.72,
+      "start": 39.184,
+      "speechEnd": 45.474
+    },
+    {
+      "scene": 5,
+      "originalStart": 27.72,
+      "originalEnd": 34.95,
+      "start": 49.392,
+      "speechEnd": 56.622
+    },
+    {
+      "scene": 6,
+      "originalStart": 34.95,
+      "originalEnd": 42.18,
+      "start": 60.54,
+      "speechEnd": 67.77
+    },
+    {
+      "scene": 7,
+      "originalStart": 42.18,
+      "originalEnd": 49.5,
+      "start": 71.688,
+      "speechEnd": 79.008
+    },
+    {
+      "scene": 8,
+      "originalStart": 49.5,
+      "originalEnd": 56.35,
+      "start": 82.926,
+      "speechEnd": 89.776
+    },
+    {
+      "scene": 9,
+      "originalStart": 56.35,
+      "originalEnd": 63.99,
+      "start": 93.695,
+      "speechEnd": 101.335
+    },
+    {
+      "scene": 10,
+      "originalStart": 63.99,
+      "originalEnd": 72.48,
+      "start": 105.253,
+      "speechEnd": 113.743
+    },
+    {
+      "scene": 11,
+      "originalStart": 72.48,
+      "originalEnd": 77.79,
+      "start": 117.661,
+      "speechEnd": 122.971
+    },
+    {
+      "scene": 12,
+      "originalStart": 77.79,
+      "originalEnd": 83.14,
+      "start": 126.889,
+      "speechEnd": 132.239
+    },
+    {
+      "scene": 13,
+      "originalStart": 83.14,
+      "originalEnd": 91.69,
+      "start": 136.157,
+      "speechEnd": 144.707
+    },
+    {
+      "scene": 14,
+      "originalStart": 91.69,
+      "originalEnd": 98.6,
+      "start": 148.625,
+      "speechEnd": 155.535
+    },
+    {
+      "scene": 15,
+      "originalStart": 98.6,
+      "originalEnd": 103.18,
+      "start": 159.453,
+      "speechEnd": 164.033
+    },
+    {
+      "scene": 16,
+      "originalStart": 103.18,
+      "originalEnd": 107.729,
+      "start": 167.951,
+      "speechEnd": 172.5
+    }
+  ],
+  "boundaries": [
+    0,
+    6.0,
+    15.828,
+    27.136,
+    39.184,
+    49.392,
+    60.54,
+    71.688,
+    82.926,
+    93.695,
+    105.253,
+    117.661,
+    126.889,
+    136.157,
+    148.625,
+    159.453,
+    167.951,
+    172.4999,
+    180
+  ]
+}

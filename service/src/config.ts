@@ -63,8 +63,8 @@ export async function verifyFacilitatorSupports(
   }
   const advertised = body?.kinds ?? body?.supported;
   if (!Array.isArray(advertised) || !advertised.some((item: any) =>
-      item && item.network === requiredNetwork && item.scheme === requiredScheme)) {
-    throw new Error("Facilitator did not advertise exact scheme on required Solana devnet network");
+      item && item.x402Version === 2 && item.network === requiredNetwork && item.scheme === requiredScheme)) {
+    throw new Error("Facilitator did not advertise x402 V2 exact scheme on required Solana devnet network");
   }
 }
 

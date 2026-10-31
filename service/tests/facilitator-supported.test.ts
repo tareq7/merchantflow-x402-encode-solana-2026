@@ -6,14 +6,18 @@ afterEach(() => { globalThis.fetch = originalFetch; });
 
 describe("Fail-closed capability discovery", () => {
   it("permits only exact devnet advertised pair", async () => {
-    const spy = vi.fn(async () => ({ ok: true, json: async () => ({ kinds:[{ network:DEVNET_CAIP2, scheme:"exact" }] }) }));
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({ kinds:[{ x402Version:2, network:DEVNET_CAIP2, scheme:"exact" }] }) }));
     globalThis.fetch = spy as any;
     await expect(verifyFacilitatorSupports("https://example.invalid/facilitator")).resolves.toBeUndefined();
     expect(spy).toHaveBeenCalledOnce();
   });
   it("rejects unsupported mainnet-only pair", async () => {
-    globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ kinds:[{network:"solana:mainnet",scheme:"exact"}] }) })) as any;
+    globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ kinds:[{x402Version:2,network:"solana:mainnet",scheme:"exact"}] }) })) as any;
     await expect(verifyFacilitatorSupports("https://example.invalid/facilitator")).rejects.toThrow("did not advertise");
+  });
+  it("rejects a V1 facilitator even if scheme and network match", async () => {
+    globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ kinds:[{x402Version:1, network:DEVNET_CAIP2, scheme:"exact"}] }) })) as any;
+    await expect(verifyFacilitatorSupports("https://example.invalid")).rejects.toThrow("did not advertise");
   });
   it("rejects empty or malformed capability lists", async () => {
     globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ kinds:[] }) })) as any;

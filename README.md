@@ -26,6 +26,42 @@ MerchantFlow x402 is the proposed project already created and checkpoint-submitt
 
 ---
 
+## MerchantFlow x402 V2 — Solana Devnet Integration (2026-10-31)
+
+**Status:** MVP on `feat/x402-v2-mvp` — separate Express service with real x402 V2 middleware, policy module, and 402 guards. See [REAL_X402_V2_STATUS.md](docs/REAL_X402_V2_STATUS.md) for truthful real vs mock claims and ATA prerequisite.
+
+**What is new:**
+- `service/` — separately startable Express API (`npm ci && npm test` in `service/`) with `GET /api/merchant/inventory` guarded by **actual** `@x402/express` V2 middleware using `@x402/svm` exact scheme on `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`. Synthetic inventory only.
+- Headers: `PAYMENT-REQUIRED` (402), `PAYMENT-SIGNATURE`, `PAYMENT-RESPONSE` (V2, not V1 `X-PAYMENT`).
+- Fail-closed env: `SOLANA_PAY_TO` and `FACILITATOR_URL` required; facilitator capability verified where possible; no embedded keys.
+- Bounded human-approved agent spend policy (`service/src/policy.ts`) — deny-by-default, requires human approval token, per-request/daily/rate caps, **cannot authorize wallet signing** (verified by tests).
+- Tests: unauthenticated 402 non-delivery with official SDK, policy/error/bypass tests, mock facilitator clearly labeled as mock (not real settlement).
+- Docs: `service/README.md` + `/api/docs/x402` + `docs/REAL_X402_V2_STATUS.md` cover idempotency/replay (delegated to facilitator/Solana nonce), facilitator requirements, and USDC ATA prerequisite with `spl-token create-account` instructions.
+
+**Quickstart (service):**
+```bash
+cd service
+npm ci
+npm run typecheck && npm test && npm run build
+SOLANA_PAY_TO=<devnet_address> FACILITATOR_URL=https://x402.org/facilitator npm run dev
+curl -i http://localhost:3001/api/merchant/inventory  # 402 PAYMENT-REQUIRED
+curl http://localhost:3001/health                     # 200
+```
+
+**Original app untouched:** `npm ci && npm test && npm run build` at repo root still passes; React dashboard and deterministic engine unchanged. Prior Meta provenance retained below.
+
+**Implemented blockers update (truthful):**
+- [x] Real x402 V2 payment-required flow for `GET /api/merchant/inventory` — 402 with `PAYMENT-REQUIRED` (tested).
+- [~] Devnet payment processing — middleware wired for Solana devnet `exact`; real USDC settlement NOT executed (no keys/funds), facilitator verification/fail-closed implemented, mock vs real documented.
+- [x] Only deliver after verified payment — middleware blocks unauthenticated; no inventory leaked (tested).
+- [x] Idempotency/replay and facilitator requirements documented in `docs/REAL_X402_V2_STATUS.md` and `GET /api/docs/x402`.
+- [ ] End-to-end live settlement demo with funded devnet wallet + ATA — pending (requires live facilitator + ATA; see docs).
+- [x] Repo + run instructions updated; provenance retained.
+
+
+
+---
+
 ## Original SellerPilot AI implementation (historical baseline)
 
 ### SellerPilot AI — intelligence, in control.

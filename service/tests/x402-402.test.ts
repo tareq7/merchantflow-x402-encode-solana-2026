@@ -23,7 +23,7 @@ function createMockFacilitatorServer() {
 }
 
 const ENV = {
-  SOLANA_PAY_TO: "9W3k6Vuhq8KM9R6e6eK7a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8",
+  SOLANA_PAY_TO: "GCuigwG5dA9t6ws5wPtfidwMbsxh6QsfUTU88AQx7KnPa8",
   FACILITATOR_URL: "https://x402.org/facilitator",
   X402_PRICE: "$0.01",
   PORT: 3999,

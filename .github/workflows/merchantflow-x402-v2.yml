@@ -1,0 +1,47 @@
+name: MerchantFlow x402 V2 preflight and lockfile
+on:
+  push:
+    branches:
+      - feat/x402-v2-mvp
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  service-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/x402-v2-mvp
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate deterministic service lockfile from pinned SDK versions
+        working-directory: service
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit lockfile only, if new
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- service/package-lock.json
+          if git diff --cached --quiet; then echo "Lockfile unchanged"; else git commit -m "build(x402): record generated service dependency lockfile"; git push origin HEAD:feat/x402-v2-mvp; fi
+      - name: Install x402 service dependencies
+        working-directory: service
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify x402 TypeScript
+        working-directory: service
+        run: npm run typecheck
+      - name: Run x402 V2 middleware and fail-closed tests
+        working-directory: service
+        run: npm test
+      - name: Build service
+        working-directory: service
+        run: npm run build
+      - name: Install inherited dashboard dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run inherited regression tests
+        run: npm test
+      - name: Build inherited React dashboard
+        run: npm run build

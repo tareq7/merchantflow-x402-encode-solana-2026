@@ -13,3 +13,5 @@ coverage/
 api/_compiled.mjs
 .work-video/
 .work-production/
+service/node_modules/
+service/dist/

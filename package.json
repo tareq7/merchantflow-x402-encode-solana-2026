@@ -1,9 +1,9 @@
 {
-  "name": "sellerpilot-ai",
+  "name": "merchantflow-x402-encode-solana-2026",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Stock-aware seller-controlled Amazon/Noon operations copilot",
+  "description": "MerchantFlow x402 — Encode Solana Hackathon 2026 adaptation; real x402/Solana devnet integration pending",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build && node scripts/build-api.mjs",

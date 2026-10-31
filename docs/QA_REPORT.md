@@ -1,3 +1,5 @@
+> **Encode Club Solana Hackathon 2026 — Best Use of x402 on Solana variant:** Inherited Meta-era baseline documentation follows; no x402 or Solana feature is demonstrated here. See [current event checklist](SUBMISSION_CHECKLIST.md).
+
 # Quality report — October 27, 2026
 
 ## Verified state

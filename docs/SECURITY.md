@@ -1,3 +1,5 @@
+> **Encode Club Solana Hackathon 2026 — Best Use of x402 on Solana variant:** Inherited Meta-era baseline documentation follows; no x402 or Solana feature is demonstrated here. See [current event checklist](SUBMISSION_CHECKLIST.md).
+
 # Security model and explicit spending gate
 
 The public SellerPilot demo works without paid APIs, merchant login or marketplace writes. Canonicalized Amazon/Noon CSVs are analyzed locally in the user's browser. The app is not permitted to send imported private reports to the Meta **Contributor** model, because Meta may use prompts and outputs to improve its models.

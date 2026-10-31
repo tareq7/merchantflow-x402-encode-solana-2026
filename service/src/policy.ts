@@ -20,14 +20,14 @@ export type PolicyRequest = {
   priceUsd: number;           // proposed spend for this request
   endpoint: string;           // target endpoint, e.g., "GET /api/merchant/inventory"
   approvalToken?: string;     // human approval token presented by agent
-  timestamp?: number;          // ms since epoch, defaults to Date.now()
+  timestamp?: number;          // legacy/untrusted input: ignored for enforcement
 };
 
 export type PolicyDecision = {
   allowed: boolean;
   reason: string;
   remainingDailyUsd?: number;
-  code: "approved" | "denied_no_approval" | "denied_over_per_request" | "denied_over_daily" | "denied_rate_limited" | "denied_invalid_price";
+  code: "approved" | "denied_no_approval" | "denied_over_per_request" | "denied_over_daily" | "denied_rate_limited" | "denied_invalid_price" | "denied_invalid_config";
 };
 
 export type PolicyState = {
@@ -55,8 +55,18 @@ export function evaluatePolicy(
   config: PolicyConfig = DEFAULT_CONFIG,
   state: PolicyState
 ): { decision: PolicyDecision; nextState: PolicyState } {
-  const now = req.timestamp ?? Date.now();
+  // Never trust the agent-supplied timestamp for daily/rate-limit enforcement.
+  const now = Date.now();
   const price = req.priceUsd;
+
+  // Fail closed on malformed limits (including NaN/Infinity).
+  if (![config.maxPerRequestUsd, config.maxDailyUsd].every((cap) => Number.isFinite(cap) && cap > 0)
+      || !Number.isSafeInteger(config.maxRequestsPerHour) || config.maxRequestsPerHour <= 0) {
+    return {
+      decision: { allowed: false, reason: "Invalid or non-finite spend policy configuration", code: "denied_invalid_config" },
+      nextState: state,
+    };
+  }
 
   // Validate price
   if (!Number.isFinite(price) || price <= 0 || price > 1000) {

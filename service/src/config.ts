@@ -9,8 +9,24 @@ import { z } from "zod";
 export const DEVNET_CAIP2 = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" as const;
 export const REQUIRED_SCHEME = "exact" as const;
 
+// Verify actual Base58-decoded public-key width, not just alphabet/character count.
+export function isValidSolanaPublicKey(value: string): boolean {
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value)) return false;
+  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  let number = 0n;
+  for (const character of value) {
+    const digit = alphabet.indexOf(character);
+    if (digit < 0) return false;
+    number = number * 58n + BigInt(digit);
+  }
+  const leadingZeroBytes = value.match(/^1*/)?.[0].length ?? 0;
+  let nonzeroBytes = 0;
+  while (number > 0n) { nonzeroBytes++; number >>= 8n; }
+  return leadingZeroBytes + nonzeroBytes === 32;
+}
+
 const envSchema = z.object({
-  SOLANA_PAY_TO: z.string().min(32).max(64).regex(/^[1-9A-HJ-NP-Za-km-z]+$/, "Must be a valid Solana base58 address"),
+  SOLANA_PAY_TO: z.string().refine(isValidSolanaPublicKey, "Must be a 32-byte Base58 Solana public key"),
   FACILITATOR_URL: z.string().url(),
   X402_PRICE: z.string().default("$0.01"),
   PORT: z.coerce.number().int().positive().max(65535).default(3001),

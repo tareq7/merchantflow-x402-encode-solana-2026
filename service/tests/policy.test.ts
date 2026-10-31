@@ -52,6 +52,27 @@ describe("bounded human-approved agent spend policy", () => {
     expect(denied.decision.code).toBe("denied_rate_limited");
   });
 
+  test("forged request timestamp does not reset daily spending or rate limits", () => {
+    const cfg = { ...POLICY_DEFAULTS, humanApprovalToken: "tok", maxPerRequestUsd: 0.10, maxDailyUsd: 1, maxRequestsPerHour: 1 };
+    const now = Date.now();
+    const dayKey = new Date(now).toISOString().slice(0, 10);
+    const nearCap = { dailySpentUsd: 0.99, dayKey, requestTimestamps: [] };
+    const future = evaluatePolicy({ priceUsd: 0.02, endpoint: "GET /api/merchant/inventory", approvalToken: "tok", timestamp: now + 86400000 }, cfg, nearCap);
+    expect(future.decision.code).toBe("denied_over_daily");
+    const rateState = { dailySpentUsd: 0, dayKey, requestTimestamps: [now] };
+    const oldTimestamp = evaluatePolicy({ priceUsd: 0.01, endpoint: "GET /api/merchant/inventory", approvalToken: "tok", timestamp: now - 86400000 }, cfg, rateState);
+    expect(oldTimestamp.decision.code).toBe("denied_rate_limited");
+  });
+
+  test("malformed or non-finite spend limits always fail closed", () => {
+    const state = createPolicyState();
+    for (const maxDailyUsd of [NaN, Infinity, -1, 0]) {
+      const cfg = { ...POLICY_DEFAULTS, humanApprovalToken: "tok", maxDailyUsd };
+      const result = evaluatePolicy({ priceUsd: 0.01, endpoint: "GET /api/merchant/inventory", approvalToken: "tok" }, cfg, state);
+      expect(result.decision.code).toBe("denied_invalid_config");
+    }
+  });
+
   test("wrong approval token denied", () => {
     const state = createPolicyState();
     const cfg = { ...POLICY_DEFAULTS, humanApprovalToken: "correct" };

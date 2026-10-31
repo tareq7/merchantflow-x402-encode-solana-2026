@@ -96,7 +96,9 @@ On Solana, USDC is an SPL token. The `SOLANA_PAY_TO` address **must** have an as
 - **PAYMENT-RESPONSE:** The SDK can provide settlement metadata on success. No success has been observed in a real devnet transaction; retries, duplicate payment, and concurrency behavior remain unverified.
 - **Timeouts:** Expired authorizations should be rejected by compliant facilitators; this has not yet been tested against a live facilitator. Clients must not blindly resubmit payment after ambiguous settlement.
 
-## Facilitator Requirements\n\nAt startup, demand a `/supported` record with `x402Version: 2`, `scheme: exact`, and the Solana-devnet CAIP-2 network. Do not accept V1-only facilitators.
+## Facilitator Requirements
+
+At startup, demand a `/supported` record with `x402Version: 2`, `scheme: exact`, and the Solana-devnet CAIP-2 network. Do not accept V1-only facilitators.
 
 - Must support `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` + `exact`.
 - Must expose `/verify` and `/settle` as per x402 spec (v2).

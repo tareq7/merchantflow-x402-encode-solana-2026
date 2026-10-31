@@ -18,7 +18,7 @@ describe("facilitator config — fail closed", () => {
     expect(() => loadEnv({} as any)).toThrow();
   });
   test("valid env loads", () => {
-    const env = loadEnv({ SOLANA_PAY_TO: "GCuigwG5dA9t6ws5wPtfidwMbsxh6QsfUTU88AQx7KnPa8", FACILITATOR_URL: "https://x402.org/facilitator" } as any);
+    const env = loadEnv({ SOLANA_PAY_TO: "GCuigwG5dA9t6ws5wPtfidwMbsxh6QsfUTU88AQx7KnP", FACILITATOR_URL: "https://x402.org/facilitator" } as any);
     expect(env.SOLANA_PAY_TO).toBeDefined();
     expect(env.FACILITATOR_URL).toBe("https://x402.org/facilitator");
   });

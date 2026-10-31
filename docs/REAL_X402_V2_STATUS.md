@@ -19,7 +19,7 @@
 | Facilitator verification / fail-closed | ✅ Implemented | `service/src/config.ts:verifyFacilitatorSupports()` + `service/src/server.ts:startServer()` fails closed on init error; requires `FACILITATOR_URL` env; no embedded keys |
 | Human-approved bounded agent spend policy (no wallet signing) | ✅ Implemented | `service/src/policy.ts` — deny-by-default, human approval token, per-request/daily/rate caps; `assertNoWalletSigning()` throws; module never signs |
 | Synthetic inventory data only | ✅ Real | `service/src/inventory.ts` — 5 synthetic SKUs, no real seller data |
-| Idempotency / replay handling | ✅ Documented | `GET /api/docs/x402` + this doc; delegates to facilitator/Solana transaction uniqueness |
+| Idempotency / replay handling | ⚠️ Design only; no durable replay ledger | `GET /api/docs/x402` documents current limitation. The facilitator must be audited; ledger + atomic consume required before production |
 | **Real Solana devnet settlement (USDC transfer on-chain, confirmed)** | ❌ NOT performed | No real USDC minted/transferred on devnet; no transaction signature produced; `FACILITATOR_URL` defaults to public facilitator but settlement not executed in CI/tests |
 | Mock facilitator tests marked as MOCK | ✅ Done | `service/tests/x402-402.test.ts` MOCK suite explicitly labeled “clearly labeled as MOCK, not actual chain settlement” |
 | Original React app unbroken | ✅ Verified | `npm test` / `npm run build` at repo root still pass (see outcome logs) |
@@ -30,7 +30,7 @@
 - **402 challenge:** Unauthenticated requests receive HTTP 402 with base64-encoded `PAYMENT-REQUIRED` JSON. Decoded challenge contains `network: solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`, `scheme: exact`, `payTo: <SOLANA_PAY_TO>`, `price: $0.01`.
 - **Environment enforcement:** `service/src/config.ts:loadEnv()` throws if `SOLANA_PAY_TO` or `FACILITATOR_URL` missing. No fallback embedded address.
 - **Policy engine:** `service/src/policy.ts:evaluatePolicy()` enforces human approval token, caps, and rate limits. It cannot sign — `assertNoWalletSigning()` throws and no `signer` is imported.
-- **Tests:** 22 service tests pass, including 402 non-delivery, V1 rejection, policy deny/allow, and config fail-closed.
+- **Tests:** At least 28 service tests pass after facilitator improvements (see CI), including 402 non-delivery, V1 rejection, policy deny/allow and config fail-closed. These are local/mock tests, not chain proof.
 
 ## What is SIMULATED / MOCK
 
@@ -91,12 +91,12 @@ On Solana, USDC is an SPL token. The `SOLANA_PAY_TO` address **must** have an as
 
 ## Idempotency & Replay Protection
 
-- **Delegated to facilitator + Solana:** Each `PAYMENT-SIGNATURE` contains a signed Solana transaction (exact scheme). The facilitator verifies the signature and submits the transaction once. Duplicate submission of the same signed transaction is rejected by Solana as already confirmed or by facilitator as replay.
-- **No custom DB:** This MVP does not maintain an idempotency table; replay protection relies on blockchain nonce (recentBlockhash + lastValidBlockHeight) and facilitator verification.
-- **PAYMENT-RESPONSE echo:** On success, `PAYMENT-RESPONSE` header contains base64-encoded `SettlementResponse` with transaction hash. Replaying the same `PAYMENT-SIGNATURE` will not credit twice; facilitator returns error.
-- **Timeouts:** `maxTimeoutSeconds` can be set per route (default facilitator timeout). Expired transactions are rejected; client must create a new payment.
+- **Not proven:** The facilitator verifies and may settle a signed authorization, but we have not audited its deduplication logic or tested concurrent replay. Solana transaction uniqueness alone is insufficient to guarantee idempotent HTTP resource delivery or exactly-once application side effects.
+- **Missing durable ledger:** This MVP has no atomic, durable consumed-authorization table or exactly-once semantics. Add one before serving anything with side effects or charging production users.
+- **PAYMENT-RESPONSE:** The SDK can provide settlement metadata on success. No success has been observed in a real devnet transaction; retries, duplicate payment, and concurrency behavior remain unverified.
+- **Timeouts:** Expired authorizations should be rejected by compliant facilitators; this has not yet been tested against a live facilitator. Clients must not blindly resubmit payment after ambiguous settlement.
 
-## Facilitator Requirements
+## Facilitator Requirements\n\nAt startup, demand a `/supported` record with `x402Version: 2`, `scheme: exact`, and the Solana-devnet CAIP-2 network. Do not accept V1-only facilitators.
 
 - Must support `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` + `exact`.
 - Must expose `/verify` and `/settle` as per x402 spec (v2).

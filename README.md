@@ -2,33 +2,38 @@
 
 **Project:** MerchantFlow x402  
 **Event:** Encode Club Solana Hackathon 2026 — Best Use of x402 on Solana  
-**Status:** **Checkpoint idea submitted separately in Encode Club; final technical submission NOT ready.**  
+**Status:** **Real 0.01-test-USDC settlement finalized on Solana Devnet on November 2, 2026. Final hackathon portal submission is still pending.**  
 **Final deadline:** 8 November 2026  
 **New repo:** https://github.com/tareq7/merchantflow-x402-encode-solana-2026  
 **Original project:** https://github.com/tareq7/sellerpilot-ai, built for the Meta Global AI Developer Hackathon in October 2026.
 
-> This is a **full-history clone of SellerPilot**, not proof of a new Solana application. The dashboard, prior demo film and imported tests predate the Solana x402 work. The event project's current milestone covers a concept only; a genuine Solana devnet x402 integration has not been implemented or verified.
+> **Provenance:** The React dashboard and earlier Meta demo are inherited from SellerPilot. The x402 V2 service, bounded approval policy, Devnet readiness checks and one actual finalized test-USDC settlement were implemented separately for the Solana challenge. The prior Meta video does not demonstrate x402.
 
-## Planned x402 extension
 
-MerchantFlow x402 is the proposed project already created and checkpoint-submitted on Encode Club: a Solana-devnet pay-per-request API for commerce agents that request inventory/pricing/logistics results, using x402 settlement and hard per-request budgets. The current imported SellerPilot code does NOT implement any x402 or Solana API, wallet, payment challenge or verification logic.
+### Verify the real Solana Devnet settlement
+
+Run `node service/scripts/verify-devnet-x402-proof.mjs` to independently verify the [finalized x402 transaction](https://explorer.solana.com/tx/Gj8WB6fGmb3QQya3egcQBNDdMK2L6efhDL8cLukMXZc5MdAAfwAdadfKKrSRXKju9FoT125QgYg4nqYn6TbzFvA?cluster=devnet), exact 10,000 micro-USDC SPL transfer, buyer/merchant balance deltas, and facilitator fee payer using read-only public Devnet RPC. HTTP 200 and `PAYMENT-RESPONSE` were observed separately in the local application; on-chain RPC alone cannot verify HTTP delivery. The script never accesses a wallet or sends a payment.
+
+## Implemented x402 V2 extension
+
+MerchantFlow x402 now includes a separate Solana Devnet **synthetic inventory API** with genuine x402 V2 exact payment middleware, HTTP 402 challenge, a bounded approval policy and a successful facilitator-settled test-USDC payment with HTTP 200. The inherited SellerPilot dashboard remains separate from this technical proof.
 
 ### Submission blockers
 
-- [ ] Implement real x402 payment-required HTTP flow for an API, data request, or AI agent tool.
-- [ ] Process the payment on Solana devnet with actual verification or settlement evidence (no mocked success claimed as a real chain transaction).
-- [ ] Only deliver the requested resource after verified payment; implement idempotency, rejected/expired payment and failure paths.
-- [ ] Show an end-to-end working prototype, not just a dashboard or wallet-connect button.
-- [ ] Provide a public repository with run instructions, a 2–4-minute demonstration video, and a clear description of the role of Solana.
+- [x] Implement a real x402 V2 payment-required HTTP flow for the synthetic inventory API.
+- [x] Verify one genuine finalized Solana Devnet transaction of **0.01 valueless test USDC** with independently checkable on-chain evidence.
+- [~] Deliver resource after verified payment (unpaid 402 and actual paid 200 observed); **durable replay/idempotency and complete failure/expiry handling remain unverified.**
+- [x] Demonstrate one full localhost 402 → signed V2 request → facilitator settlement → protected inventory HTTP 200 path.
+- [ ] Record a dedicated **2–4-minute Solana/x402 demonstration video** and obtain the final organizer submission receipt; public repository and run instructions exist.
 - [ ] Disclose that SellerPilot AI is inherited from a separate Meta hackathon submission and document new x402/Solana changes.
 
 **Existing video:** https://sellerpilot-ai-phi.vercel.app/demo-video.mp4 documents Meta-era SellerPilot only and cannot be used as proof of x402 payment support.
 
 ---
 
-## MerchantFlow x402 V2 — Solana Devnet Integration (2026-10-31)
+## MerchantFlow x402 V2 — Solana Devnet Integration (updated November 2, 2026)
 
-**Status:** MVP on `feat/x402-v2-mvp` — separate Express service with real x402 V2 middleware, policy module, and 402 guards. See [REAL_X402_V2_STATUS.md](docs/REAL_X402_V2_STATUS.md) for truthful real vs mock claims and ATA prerequisite.
+**Status:** Merged into `main`, with a real finalized Devnet settlement and HTTP 200. See [REAL_X402_V2_STATUS.md](docs/REAL_X402_V2_STATUS.md) for public transaction evidence, read-only verification, limitations, and provenance.
 
 **What is new:**
 - `service/` — separately startable Express API (`npm ci && npm test` in `service/`) with `GET /api/merchant/inventory` guarded by **actual** `@x402/express` V2 middleware using `@x402/svm` exact scheme on `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`. Synthetic inventory only.
@@ -52,10 +57,10 @@ curl http://localhost:3001/health                     # 200
 
 **Implemented blockers update (truthful):**
 - [x] Real x402 V2 payment-required flow for `GET /api/merchant/inventory` — 402 with `PAYMENT-REQUIRED` (tested).
-- [~] Devnet payment processing — middleware wired for Solana devnet `exact`; real USDC settlement NOT executed (no keys/funds), facilitator verification/fail-closed implemented, mock vs real documented.
+- [x] Solana Devnet exact payment — one signed **0.01 test-USDC** transfer finalized with `PAYMENT-RESPONSE` and HTTP 200; facilitator sponsored the network fee.
 - [x] Only deliver after verified payment — middleware blocks unauthenticated; no inventory leaked (tested).
 - [x] Idempotency/replay and facilitator requirements documented in `docs/REAL_X402_V2_STATUS.md` and `GET /api/docs/x402`.
-- [ ] End-to-end live settlement demo with funded devnet wallet + ATA — pending (requires live facilitator + ATA; see docs).
+- [x] Real localhost settlement with funded disposable Devnet wallets and canonical USDC token accounts; **hosted judge demo remains pending**.
 - [x] Repo + run instructions updated; provenance retained.
 
 

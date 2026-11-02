@@ -1,136 +1,76 @@
-# REAL_X402_V2_STATUS.md — MerchantFlow x402 V2 — Truthful Real vs Simulated Claims
+# MerchantFlow x402 V2 — verified real Solana Devnet settlement
 
-**Date:** 2026-10-31  
-**Branch:** `feat/x402-v2-mvp`  
-**Commit:** (see outcome.json / git log)  
-**Network:** `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` (Solana devnet, CAIP-2)  
-**Scheme:** `exact` via `@x402/core@2.29.0`, `@x402/express@2.29.0`, `@x402/svm@2.29.0`  
-**Headers:** V2 `PAYMENT-REQUIRED` (402), `PAYMENT-SIGNATURE` (request), `PAYMENT-RESPONSE` (200) — NOT V1 `X-PAYMENT`  
+**Verified:** November 2, 2026. **Network:** Solana Devnet (CAIP-2 `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`). **Scheme:** `exact`. **Amount:** 0.01 valueless test USDC. **Final hackathon submission:** not yet confirmed.
 
-> This document is the canonical truthful record required by the task. It distinguishes what is real, what is mocked, and what remains unverified.
+This document replaces older pre-settlement notes. It distinguishes the real, finalized x402 transaction from local mocks and from capabilities that remain unproven.
 
-## Summary
+## Confirmed end-to-end test
 
-| Claim | Status | Evidence |
-|---|---|---|
-| x402 V2 middleware with Solana devnet exact scheme | ✅ Real, implemented | `service/src/x402.ts` registers `ExactSvmScheme` for `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`; `service/src/server.ts` uses `paymentMiddleware(routes, resourceServer)` from `@x402/express` |
-| 402 PAYMENT-REQUIRED on unauthenticated `GET /api/merchant/inventory` | ✅ Real, tested | `service/tests/x402-402.test.ts` — 402 with `PAYMENT-REQUIRED` header, no inventory delivery; verified with official SDK middleware |
-| V1 `X-PAYMENT` not used as primary | ✅ Real | Tests assert `PAYMENT-REQUIRED` presence and that `X-PAYMENT` alone does not grant access |
-| Facilitator verification / fail-closed | ✅ Implemented | `service/src/config.ts:verifyFacilitatorSupports()` + `service/src/server.ts:startServer()` fails closed on init error; requires `FACILITATOR_URL` env; no embedded keys |
-| Human-approved bounded agent spend policy (no wallet signing) | ✅ Implemented | `service/src/policy.ts` — deny-by-default, human approval token, per-request/daily/rate caps; `assertNoWalletSigning()` throws; module never signs |
-| Synthetic inventory data only | ✅ Real | `service/src/inventory.ts` — 5 synthetic SKUs, no real seller data |
-| Idempotency / replay handling | ⚠️ Design only; no durable replay ledger | `GET /api/docs/x402` documents current limitation. The facilitator must be audited; ledger + atomic consume required before production |
-| **Real Solana devnet settlement (USDC transfer on-chain, confirmed)** | ❌ NOT performed | No real USDC minted/transferred on devnet; no transaction signature produced; `FACILITATOR_URL` defaults to public facilitator but settlement not executed in CI/tests |
-| Mock facilitator tests marked as MOCK | ✅ Done | `service/tests/x402-402.test.ts` MOCK suite explicitly labeled “clearly labeled as MOCK, not actual chain settlement” |
-| Original React app unbroken | ✅ Verified | `npm test` / `npm run build` at repo root still pass (see outcome logs) |
+| Check | Evidence |
+|---|---|
+| Resource | `GET /api/merchant/inventory` on a transient localhost Express server from `service/src/server.ts` |
+| Before payment | Actual HTTP 402 with V2 `PAYMENT-REQUIRED`; synthetic inventory was not delivered |
+| Safety gates | Pinned Devnet network, `exact` scheme, Circle Devnet USDC mint, verified recipient and exactly 10,000 token base units; local approval policy limited the single request to $0.01 |
+| Signed request | One V2 `PAYMENT-SIGNATURE` produced using the human-approved laptop-local disposable buyer signer, then sent **once** (no retries) |
+| Facilitator | `https://x402.org/facilitator`, initialized and capability-checked before opening the endpoint |
+| HTTP result | Actual **200**, synthetic inventory delivered, `PAYMENT-RESPONSE` present and settlement `success=true` |
+| Transaction result | **Finalized** Solana Devnet transaction with `meta.err=null` and exact SPL `transferChecked` of 10,000 micro-USDC |
+| Fee sponsorship | Facilitator fee payer `CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5` paid **10,001 lamports**; buyer had 0 SOL |
+| Repeatability | Read-only independent verification available; no second paid transaction performed |
 
-## What is REAL
+**Finalized transaction:** [Solana Explorer](https://explorer.solana.com/tx/Gj8WB6fGmb3QQya3egcQBNDdMK2L6efhDL8cLukMXZc5MdAAfwAdadfKKrSRXKju9FoT125QgYg4nqYn6TbzFvA?cluster=devnet)
 
-- **Middleware wiring:** `service/src/server.ts:paymentMiddleware(routes, resourceServer)` is the official `@x402/express` V2 middleware. It intercepts `GET /api/merchant/inventory`, validates `PAYMENT-SIGNATURE`, and only forwards to the handler after facilitator verification.
-- **402 challenge:** Unauthenticated requests receive HTTP 402 with base64-encoded `PAYMENT-REQUIRED` JSON. Decoded challenge contains `network: solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`, `scheme: exact`, `payTo: <SOLANA_PAY_TO>`, `price: $0.01`.
-- **Environment enforcement:** `service/src/config.ts:loadEnv()` throws if `SOLANA_PAY_TO` or `FACILITATOR_URL` missing. No fallback embedded address.
-- **Policy engine:** `service/src/policy.ts:evaluatePolicy()` enforces human approval token, caps, and rate limits. It cannot sign — `assertNoWalletSigning()` throws and no `signer` is imported.
-- **Tests:** At least 28 service tests pass after facilitator improvements (see CI), including 402 non-delivery, V1 rejection, policy deny/allow and config fail-closed. These are local/mock tests, not chain proof.
-
-## What is SIMULATED / MOCK
-
-- **Facilitator settlement in tests:** Tests use a non-live `FACILITATOR_URL=https://x402.org/facilitator` but **do not actually call verify/settle** against a live Solana RPC for the 402 challenge generation. The MOCK-labeled test suite in `x402-402.test.ts` explicitly states it is not real settlement.
-- **No real token movement:** No USDC was minted on devnet, no `spl-token create-account` executed, no transaction submitted to devnet RPC, no block confirmation observed.
-
-## What is NOT done / Deployment limits
-
-- **No live wallet:** No keypair generated, no private key stored, no signing in CI.
-- **No funded facilitator:** Public facilitator may not have devnet USDC or may require operator setup; `verifyFacilitatorSupports()` will fail closed if facilitator does not advertise `exact` on `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`.
-- **No mainnet exposure:** All amounts are `$0.01` devnet placeholder. Never use mainnet keys with this demo.
-- **No production deploy:** Service not deployed to Vercel/Cloudflare Workers; `wrangler.toml` remains for the React app only. Service is separately startable via `npm run dev` in `service/`.
-
-## Recipient Associated Token Account (ATA) Prerequisite
-
-On Solana, USDC is an SPL token. The `SOLANA_PAY_TO` address **must** have an associated token account for the devnet USDC mint **before** any x402 settlement can succeed. Without it, the facilitator’s `settle` will fail even with a valid `PAYMENT-SIGNATURE`.
-
-**Devnet USDC mint (example, verify via Solana devnet registry):** Check your facilitator’s devnet asset list — commonly `Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr` or facilitator-specific.
-
-**Instructions:**
-
-1. Generate a devnet recipient keypair (never commit the secret):
-   ```bash
-   solana-keygen new --no-outfile --no-bip39-passphrase
-   # or via @solana/web3.js Keypair.generate()
-   solana config set --url https://api.devnet.solana.com
-   ```
-2. Fund the recipient with devnet SOL for rent:
-   ```bash
-   solana airdrop 1 <SOLANA_PAY_TO> --url https://api.devnet.solana.com
-   ```
-3. Create the ATA for devnet USDC:
-   ```bash
-   spl-token create-account <DEVNET_USDC_MINT> --owner <SOLANA_PAY_TO> --url https://api.devnet.solana.com
-   # Verify:
-   spl-token accounts --owner <SOLANA_PAY_TO> --url https://api.devnet.solana.com
-   ```
-   Or via JS:
-   ```ts
-   import { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from "@solana/spl-token";
-   const ata = await getAssociatedTokenAddress(usdcMint, new PublicKey(SOLANA_PAY_TO));
-   ```
-4. Set `SOLANA_PAY_TO` to that funded address and `FACILITATOR_URL` to a facilitator supporting devnet `exact`.
-5. Start the service:
-   ```bash
-   cd service
-   SOLANA_PAY_TO=<addr> FACILITATOR_URL=https://x402.org/facilitator npm run dev
-   ```
-6. Test 402 challenge:
-   ```bash
-   curl -i http://localhost:3001/api/merchant/inventory
-   # -> 402 with PAYMENT-REQUIRED
-   curl -i http://localhost:3001/health
-   # -> 200
-   ```
-
-**Failure mode:** If ATA missing, facilitator `settle` returns error; client receives 402 or 500 after handler. The service logs `settlement_failed` and does not deliver inventory.
-
-## Idempotency & Replay Protection
-
-- **Not proven:** The facilitator verifies and may settle a signed authorization, but we have not audited its deduplication logic or tested concurrent replay. Solana transaction uniqueness alone is insufficient to guarantee idempotent HTTP resource delivery or exactly-once application side effects.
-- **Missing durable ledger:** This MVP has no atomic, durable consumed-authorization table or exactly-once semantics. Add one before serving anything with side effects or charging production users.
-- **PAYMENT-RESPONSE:** The SDK can provide settlement metadata on success. No success has been observed in a real devnet transaction; retries, duplicate payment, and concurrency behavior remain unverified.
-- **Timeouts:** Expired authorizations should be rejected by compliant facilitators; this has not yet been tested against a live facilitator. Clients must not blindly resubmit payment after ambiguous settlement.
-
-## Facilitator Requirements
-
-At startup, demand a `/supported` record with `x402Version: 2`, `scheme: exact`, and the Solana-devnet CAIP-2 network. Do not accept V1-only facilitators.
-
-- Must support `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` + `exact`.
-- Must expose `/verify` and `/settle` as per x402 spec (v2).
-- Must be reachable at `FACILITATOR_URL`; `GET /supported` or SDK `supported()` should list the required kind. Startup fails closed if not supported.
-- For devnet, can be public `https://x402.org/facilitator` or self-hosted facilitator with Solana RPC.
-
-## No False Chain Proof & No Real Money
-
-- ✅ No real money moved. All prices are demo `$0.01`.
-- ✅ No false chain proof claimed. No transaction hash presented as success.
-- ✅ No credentials exposed. `.env.example` contains placeholder only.
-
-## Verification Commands
-
-```bash
-# Root React app (must still pass)
-npm ci && npm test && npm run build
-
-# Service (x402 V2)
-cd service
-npm ci
-npm run typecheck   # tsc --noEmit
-npm test            # vitest — includes 402 non-delivery with official SDK
-npm run build       # tsc --noEmit
-SOLANA_PAY_TO=<devnet_addr> FACILITATOR_URL=https://x402.org/facilitator npm run dev
-# curl 402 demo:
-curl -i http://localhost:3001/api/merchant/inventory  # 402 PAYMENT-REQUIRED
-curl -i http://localhost:3001/health                  # 200
+```text
+Gj8WB6fGmb3QQya3egcQBNDdMK2L6efhDL8cLukMXZc5MdAAfwAdadfKKrSRXKju9FoT125QgYg4nqYn6TbzFvA
 ```
 
-## Prior Provenance
+The public finalized transaction's historical SPL Token balance arrays confirm:
 
-This repository is a full-history clone of `sellerpilot-ai` (Meta Global AI Developer Hackathon, Oct 2026). All SellerPilot code (React dashboard, deterministic engine, CSV import) is retained. New x402 Solana work is under `service/` and isolated; it does not modify `src/domain/*` logic.
+| | Pre-transaction | Post-transaction | Change |
+|---|---:|---:|---:|
+| Buyer | 20,000,000 | 19,990,000 | −10,000 micro-USDC |
+| Merchant | 20,000,000 | 20,010,000 | +10,000 micro-USDC |
 
-**No final submission claims:** This V2 integration is an MVP for Encode Club Solana Hackathon 2026; final technical submission requires live devnet settlement evidence and is not claimed here.
+Mint: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` (Circle Devnet USDC, 6 decimals).
+
+Buyer: `Eh7aZUfqSdzeT3MoFozkB2my236yiJqRqe916cJa53Za`, canonical ATA `9sNouueeCcZw6Zx3qM1sESJNZqmtpKFC8z9JgzZ9HpzX`.
+
+Merchant: `Ev7owEPQLDn3LEsd6uPPakxNVU6dVk5syN2BDjob6LhQ`, canonical ATA `DGXtE2iekWP2h78DuBJWp68C1NhowTCv3reDVNAUXYPs`.
+
+Both token-account addresses were independently derived via the official associated-token PDA derivation and matched the initialized on-chain accounts. Both wallets were funded with valueless Circle faucet Devnet USDC. Buyer key materials are **not included in this repository**.
+
+## Reproduce the public chain verification — no wallet or payment required
+
+```bash
+node service/scripts/verify-devnet-x402-proof.mjs
+```
+
+The script performs *only* public read-only `getGenesisHash`, `getSignatureStatuses` and `getTransaction` calls to Solana Devnet. It fails closed if the network, signature finality, token mint, seller, buyer, source/destination associated token accounts, exact transfer amount, sponsor payer or balance changes differ.
+
+**Scope of proof:** Blockchain RPC proves the finalized on-chain transfer and fee payer; it cannot independently prove HTTP response headers. The HTTP 200, inventory response and `PAYMENT-RESPONSE` were observed in the actual local application run, not mocked.
+
+## Reproduce the unpaid challenge
+
+```bash
+cd service
+npm ci
+npm run typecheck && npm test && npm run build
+export SOLANA_PAY_TO=YOUR_SEPARATE_DEVNET_RECIPIENT_ADDRESS
+export FACILITATOR_URL=https://x402.org/facilitator
+export X402_PRICE='$0.01'
+npm run dev
+curl -i http://localhost:3001/api/merchant/inventory
+# HTTP 402, PAYMENT-REQUIRED V2, no inventory
+```
+
+For an **independent paid test**, use your own explicitly authorized disposable Devnet USDC wallet, verified recipient ATA and official x402 V2 SVM client. Check the network, recipient, mint and amount before signing. Never reuse or publish a wallet seed or blindly retry when settlement status is uncertain. `npm run readiness` only inspects public state and never signs or sends a transaction.
+
+## Limits, provenance, and submission status
+
+- **Not production-safe for side effects:** There is no durable consumed-payment ledger or atomic replay reservation. One successful settlement does *not* prove concurrent retry safety, exactly-once billing, refunds, or robust expiry/failure handling. This API returns **synthetic read-only inventory only**.
+- **Local service, public chain:** The resource server ran on localhost; there is no claim of a deployed public payment endpoint or judge-accessible authenticated UI.
+- **No real money:** These are Circle **Devnet test tokens**, not mainnet USDC or sponsor cash credits.
+- **Clear provenance:** The React dashboard and SellerPilot marketplace logic predate this Solana challenge and were imported from an earlier Meta SellerPilot hackathon. New event-period work is in `service/`: x402 V2 middleware, approval policy, Solana preflight, tests, and the genuine Devnet payment proof.
+- **Final submission unconfirmed:** A distinct 2–4-minute Solana/x402 demo, applicable licensing checks and actual organizer portal receipt remain outstanding. Do not treat this README or passing CI as a final hackathon entry.
+
+The local/mock tests remain useful for regression; they are **not** relabeled as live settlement tests. The proof above is a separately executed real transaction, independently verifiable by the read-only script.

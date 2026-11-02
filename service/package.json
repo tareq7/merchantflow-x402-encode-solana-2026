@@ -10,7 +10,8 @@
     "build": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "readiness": "tsx src/readiness-cli.ts"
   },
   "dependencies": {
     "@x402/core": "2.29.0",

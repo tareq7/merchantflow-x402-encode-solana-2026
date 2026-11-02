@@ -35,15 +35,31 @@ curl -i http://localhost:3001/api/merchant/inventory
 # -> 402 Payment Required with PAYMENT-REQUIRED header
 ```
 
-With x402 client (example):
+With a human-controlled signer, use the actual x402 V2 SDK exports:
+
 ```ts
-import { wrapFetchWithPayment } from "@x402/fetch";
-import { createSvmClient, toClientSvmSigner } from "@x402/svm";
-// signer must be human-controlled wallet
-const client = createSvmClient({ signer });
-const paidFetch = wrapFetchWithPayment(fetch, client);
-const res = await paidFetch("http://localhost:3001/api/merchant/inventory");
+import { x402Client, x402HTTPClient } from "@x402/core/client";
+import { ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
+import { parsePaymentRequired } from "./src/readiness.ts";
+
+const resource = "http://127.0.0.1:3001/api/merchant/inventory";
+const expectedRecipient = "YOUR_SEPARATE_DEVNET_RECIPIENT_ADDRESS";
+const sdk = new x402HTTPClient(
+  new x402Client().register(
+    "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+    new ExactSvmScheme(toClientSvmSigner(humanControlledSigner))
+  )
+);
+const unpaid = await fetch(resource);
+if (unpaid.status !== 402) throw new Error("Expected unpaid 402");
+const offer = parsePaymentRequired(unpaid.headers.get("payment-required"), expectedRecipient);
+if (offer.amountBaseUnits !== "10000") throw new Error("Price exceeds approval");
+// STOP: obtain separate explicit user approval before creating a signed payload.
+// After approval: SDK createPaymentPayload, encodePaymentSignatureHeader and ONE signed GET.
+// Never automatically retry an uncertain payment or expose signer material.
 ```
+
+This is a **safety-oriented excerpt**, not an automatic payment script. Validate network, recipient, USDC mint, amount and available balance before authorizing signing. Use only disposable Devnet keys and a local test endpoint. See [the finalized-payment proof](../docs/REAL_X402_V2_STATUS.md) and [the public read-only verifier](scripts/verify-devnet-x402-proof.mjs).
 
 ## Environment
 
@@ -91,7 +107,7 @@ Recipient must have an associated token account (ATA) for devnet USDC before set
 
 ## Idempotency / Replay
 
-Delegated to facilitator + Solana transaction uniqueness. Same signed transaction cannot settle twice. See `docs/REAL_X402_V2_STATUS.md`.
+**Not production-hardened:** There is no durable consumed-payment ledger or atomic reservation. Solana transaction uniqueness does not establish exactly-once HTTP billing or side effects. See [the verified status and limits](../docs/REAL_X402_V2_STATUS.md).
 
 ### Read-only Solana Devnet x402 readiness probe
 
@@ -107,3 +123,7 @@ npm run readiness
 The probe only performs an unpaid GET to **localhost** `/api/merchant/inventory` and public read-only requests to `https://api.devnet.solana.com`. It requires a V2 `PAYMENT-REQUIRED` challenge for the **Solana devnet exact** scheme, pinned expected recipient and Circle's devnet USDC mint, and a maximum of **10,000 USDC base units ($0.01)**. It checks the actual devnet genesis hash, buyer's public SOL/USDC balance and the presence of recipient token accounts for that mint.
 
 **No signing or payments occur.** The result always states `settlement: NOT_ATTEMPTED`; even `PRECHECK_PASSED_ATA_UNVERIFIED` does **not** prove canonical ATA derivation, fee sponsorship, settlement, replay protection, or a paid HTTP 200 response. A real devnet payment still requires a separate human-controlled signer and verified on-chain transaction receipt. Never set this command to mainnet addresses, secrets, paid API keys, or a live production URL. Treat a 0 SOL balance as a warning, because a facilitator *may* sponsor fees, not as proof that fees will be covered. The recipient's canonical associated token account must be verified/provisioned independently.
+
+### Verified actual payment — November 2, 2026
+
+One human-approved **0.01 valueless Devnet USDC** x402 V2 payment genuinely settled. The localhost API returned **HTTP 200** with inventory and a successful `PAYMENT-RESPONSE`; the transaction was finalized on Solana Devnet. Run `node service/scripts/verify-devnet-x402-proof.mjs` from the repository root to independently verify the on-chain SPL transfer, token-balance changes and sponsored network fee without any wallet or payment. This does **not** establish production replay safety or deployment.

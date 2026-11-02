@@ -78,7 +78,7 @@ const { decision } = evaluatePolicy({ priceUsd: 0.01, endpoint: "GET /api/mercha
 ## Testing
 
 ```bash
-npm test          # 22 tests: 402 non-delivery, policy, config, mock-labeled
+npm test          # 45 tests: 402 non-delivery, policy, readiness, config, mock-labeled
 npm run typecheck
 npm run build
 ```
@@ -92,3 +92,18 @@ Recipient must have an associated token account (ATA) for devnet USDC before set
 ## Idempotency / Replay
 
 Delegated to facilitator + Solana transaction uniqueness. Same signed transaction cannot settle twice. See `docs/REAL_X402_V2_STATUS.md`.
+
+### Read-only Solana Devnet x402 readiness probe
+
+From `service/`, start the service locally as described above, then in a **separate shell**:
+
+```bash
+export SOLANA_PAY_TO=YourSeparateRecipientPublicKey
+export DEVNET_BUYER_PUBLIC_KEY=YourDisposableDevnetBuyerPublicKey
+# Optional: DEVNET_EXPECTED_USDC_MINT=4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+npm run readiness
+```
+
+The probe only performs an unpaid GET to **localhost** `/api/merchant/inventory` and public read-only requests to `https://api.devnet.solana.com`. It requires a V2 `PAYMENT-REQUIRED` challenge for the **Solana devnet exact** scheme, pinned expected recipient and Circle's devnet USDC mint, and a maximum of **10,000 USDC base units ($0.01)**. It checks the actual devnet genesis hash, buyer's public SOL/USDC balance and the presence of recipient token accounts for that mint.
+
+**No signing or payments occur.** The result always states `settlement: NOT_ATTEMPTED`; even `PRECHECK_PASSED_ATA_UNVERIFIED` does **not** prove canonical ATA derivation, fee sponsorship, settlement, replay protection, or a paid HTTP 200 response. A real devnet payment still requires a separate human-controlled signer and verified on-chain transaction receipt. Never set this command to mainnet addresses, secrets, paid API keys, or a live production URL. Treat a 0 SOL balance as a warning, because a facilitator *may* sponsor fees, not as proof that fees will be covered. The recipient's canonical associated token account must be verified/provisioned independently.

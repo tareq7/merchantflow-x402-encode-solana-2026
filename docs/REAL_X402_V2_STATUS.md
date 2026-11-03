@@ -45,9 +45,49 @@ Both token-account addresses were independently derived via the official associa
 node service/scripts/verify-devnet-x402-proof.mjs
 ```
 
-The script performs *only* public read-only `getGenesisHash`, `getSignatureStatuses` and `getTransaction` calls to Solana Devnet. It fails closed if the network, signature finality, token mint, seller, buyer, source/destination associated token accounts, exact transfer amount, sponsor payer or balance changes differ.
+The script performs *only* public read-only `getGenesisHash`, `getSignatureStatuses` and `getTransaction` calls to Solana Devnet. It checks the network, signature finality, token mint, payer and payee, **pinned source/destination token-account addresses**, exact transfer amount, sponsor payer and historical balance changes. **It does not independently derive canonical associated token accounts (ATAs).** The earlier verified canonical-PDA derivation was a separate Solana SDK check. Use the independent derivation command below to reproduce that additional assurance.
 
 **Scope of proof:** Blockchain RPC proves the finalized on-chain transfer and fee payer; it cannot independently prove HTTP response headers. The HTTP 200, inventory response and `PAYMENT-RESPONSE` were observed in the actual local application run, not mocked.
+
+
+## Recipient token account: create and verify on Devnet
+
+The merchant recipient must have an **initialized, canonical SPL Token associated token account (ATA)** for the exact USDC mint `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` before this facilitator can settle a payment.
+
+**Free bootstrap (no SOL funding required by the recipient):** Open [Circle's official testnet faucet](https://faucet.circle.com/), select **USDC → Solana Devnet**, and enter your **disposable recipient public address**. A successful faucet transfer can create and rent-fund its associated USDC token account automatically, as verified for the original MerchantFlow buyer and recipient. Check the resulting transaction on Solana Devnet Explorer and confirm the minted token, owner, account and balance through the public RPC. Faucet limits and availability can change; do not claim funding until finalized.
+
+**CLI alternative, only if you have an authorized funded Devnet fee payer:** `spl-token create-account 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU --owner YOUR_RECIPIENT_PUBLIC_KEY --url devnet` creates the owner's USDC associated account when the CLI is properly configured and transaction fees/rent are covered. It is a write action requiring a signer and may require Devnet SOL; do not run it merely to verify an existing account. Never use mainnet or paste private keys into commands.
+
+Verify without signing, using an installed Solana CLI:
+
+```bash
+spl-token accounts --owner YOUR_RECIPIENT_PUBLIC_KEY --url devnet
+```
+
+To **independently derive both canonical ATA addresses** for the two *public* participants in this test (this runs locally and never signs), first install the pinned `service/` dependencies with `npm ci`, then run from the `service/` directory:
+
+```bash
+node --input-type=module <<'NODE'
+import { address } from '@solana/kit';
+import { findAssociatedTokenPda, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+const mint = address('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
+const wallets = [
+  ['buyer', 'Eh7aZUfqSdzeT3MoFozkB2my236yiJqRqe916cJa53Za',
+    '9sNouueeCcZw6Zx3qM1sESJNZqmtpKFC8z9JgzZ9HpzX'],
+  ['merchant', 'Ev7owEPQLDn3LEsd6uPPakxNVU6dVk5syN2BDjob6LhQ',
+    'DGXtE2iekWP2h78DuBJWp68C1NhowTCv3reDVNAUXYPs'],
+];
+for (const [label, owner, expected] of wallets) {
+  const [actual] = await findAssociatedTokenPda({
+    owner: address(owner), mint, tokenProgram: TOKEN_PROGRAM_ADDRESS
+  });
+  if (actual !== expected) throw new Error(label + ' canonical ATA mismatch');
+  console.log(label + ': canonical ATA matches pinned account');
+}
+NODE
+```
+
+This second check is distinct from the dependency-free on-chain transaction verifier. Both must succeed before describing the pinned accounts as independently verified canonical ATAs. **Do not resend an already-settled payment or assume an arbitrary token account is the ATA.**
 
 ## Reproduce the unpaid challenge
 

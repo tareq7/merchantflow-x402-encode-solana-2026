@@ -30,10 +30,10 @@ async function rpc(method,params=[]){
 function balanceAt(tokenBalances, keys, ata, owner){
   requireCondition(Array.isArray(tokenBalances),"Missing token balances");
   const accountIndex=keys.findIndex(k=>k.pubkey===ata);
-  requireCondition(accountIndex>=0,"Missing canonical token account");
+  requireCondition(accountIndex>=0,"Pinned token-account address missing from transaction");
   const rows=tokenBalances.filter(b=>b.accountIndex===accountIndex&&b.owner===owner&&
     b.mint===expected.mint&&b.programId===expected.splTokenProgram);
-  requireCondition(rows.length===1,"Missing or ambiguous token balance");
+  requireCondition(rows.length===1,"Missing or ambiguous pinned token-account balance");
   const a=rows[0].uiTokenAmount;
   requireCondition(a.decimals===6&&typeof a.amount==="string"&&/^(0|[1-9][0-9]*)$/.test(a.amount),"Malformed token amount");
   return BigInt(a.amount);
@@ -68,7 +68,7 @@ async function main(){
     buyerBefore:beforeBuyer.toString(),buyerAfter:afterBuyer.toString(),
     merchantBefore:beforeMerchant.toString(),merchantAfter:afterMerchant.toString(),
     feePayer:expected.feePayer,networkFeeLamports:transaction.meta.fee,
-    note:"HTTP 200 and PAYMENT-RESPONSE were separately observed during the localhost integration; this read-only RPC verifier proves the chain transfer, not HTTP status."
+    note:"Read-only proof of the finalized chain transfer between pinned token accounts, not independent canonical ATA derivation or HTTP status. HTTP 200 and PAYMENT-RESPONSE were separately observed during localhost integration."
   },null,2));
 }
 try{await main()}catch(error){console.error("Verification FAILED:",error?.message??"unknown");process.exitCode=1}

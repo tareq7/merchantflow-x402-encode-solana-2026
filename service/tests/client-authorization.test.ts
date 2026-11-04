@@ -134,6 +134,7 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     expect(result.value.frozen).toBe(true);
     expect(Object.isFrozen(result.offer)).toBe(false);
     result.offer.amountBaseUnits="99999"; // Public result remains mutable; signer copy stays frozen
+    expect(signer.mock.calls[0]![0].offer.amountBaseUnits).toBe("10000");
     expect(result.value.amount).toBe("10000");
     expect(signer.mock.calls[0]![0].resourceUrl).toBe(url);
     expect(result.nextState.dailySpentUsd).toBeCloseTo(0.01);

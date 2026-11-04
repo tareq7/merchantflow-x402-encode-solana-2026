@@ -60,4 +60,4 @@ for (const c of cases) {
     synthetic: true, integratedBoundary: true,
   }));
 }
-console.log("PASS: 3 x402 quotes denied before signer callback; no wallet or transaction.");
+console.log(JSON.stringify({type:"summary",pass:true,scenarios:cases.length,signerCalls,paymentAttempted:false,synthetic:true}));

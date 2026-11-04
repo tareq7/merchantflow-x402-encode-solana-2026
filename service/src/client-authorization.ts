@@ -58,7 +58,7 @@ export async function authorizeBeforeSigner<T>(input: {
   // Bind the validated LOCAL resource to the approved quote handed to the signer.
   // A malicious callback could still ignore this contract; this is not a
   // security boundary for arbitrary signing implementations.
-  const context: ValidatedSignContext = Object.freeze({ resourceUrl, offer: Object.freeze(offer) });
+  const context: ValidatedSignContext = Object.freeze({ resourceUrl, offer: Object.freeze({ ...offer }) });
   const value = await input.signer(context);
   return { status: "signed", decision, nextState, offer, value };
 }

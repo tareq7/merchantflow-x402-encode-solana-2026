@@ -15,6 +15,8 @@ import {
   type ValidatedChallenge
 } from "./readiness.ts";
 
+export type ValidatedSignContext = Readonly<{ resourceUrl: string; offer: Readonly<ValidatedChallenge> }>;
+
 export type PreSignResult<T> =
   | { status: "denied"; decision: PolicyDecision; nextState: PolicyState }
   | { status: "signed"; decision: PolicyDecision; nextState: PolicyState; offer: ValidatedChallenge; value: T };
@@ -26,10 +28,10 @@ export async function authorizeBeforeSigner<T>(input: {
   approvalToken?: string;
   config: PolicyConfig;
   state: PolicyState;
-  signer: (validatedOffer: ValidatedChallenge) => Promise<T>;
+  signer: (validatedContext: ValidatedSignContext) => Promise<T>;
 }): Promise<PreSignResult<T>> {
   // URL is deliberately restricted to localhost: no SSRF or remote payment.
-  validateLocalResource(input.resourceUrl);
+  const resourceUrl = validateLocalResource(input.resourceUrl);
   // Strict x402 V2 exact scheme, pinned Solana Devnet, Circle test USDC, exact
   // recipient and <= 10,000 base units. A mismatch throws before signer call.
   const offer = parsePaymentRequired(input.paymentRequired, input.expectedRecipient);
@@ -42,6 +44,10 @@ export async function authorizeBeforeSigner<T>(input: {
   if (!decision.allowed) return { status: "denied", decision, nextState };
   // Only the approved path may enter a caller-injected wallet signer.
   // The signer must still enforce human confirmation, one attempt and finality.
-  const value = await input.signer(offer);
+  // Bind the validated LOCAL resource to the approved quote handed to the signer.
+  // A malicious callback could still ignore this contract; this is not a
+  // security boundary for arbitrary signing implementations.
+  const context: ValidatedSignContext = Object.freeze({ resourceUrl, offer: Object.freeze(offer) });
+  const value = await input.signer(context);
   return { status: "signed", decision, nextState, offer, value };
 }

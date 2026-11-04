@@ -42,10 +42,22 @@ export async function authorizeBeforeSigner<T>(input: {
   const response = await (input.fetcher ?? fetch)(resourceUrl, {
     method: "GET", redirect: "error", signal: AbortSignal.timeout(8000),
   });
-  if (response.status !== 402) throw new Error("Expected HTTP 402 from approved local resource");
-  // Strict x402 V2 exact scheme, pinned Solana Devnet, Circle test USDC, exact
-  // recipient and <= 10,000 base units. A mismatch throws before signer call.
-  const offer = parsePaymentRequired(response.headers.get("payment-required"), input.expectedRecipient);
+  let offer: ValidatedChallenge;
+  try {
+    if (response.status !== 402) throw new Error("Expected HTTP 402 from approved local resource");
+    // Strict x402 V2 exact scheme, pinned Solana Devnet, Circle test USDC,
+    // exact recipient and <= 10,000 base units. Never authorize on failure.
+    offer = parsePaymentRequired(response.headers.get("payment-required"), input.expectedRecipient);
+  } finally {
+    // Only the 402 status/header are needed; clean up unread response bodies.
+    // A failed cleanup must NOT replace the actual payment validation error.
+    // Never let a broken unused response stream determine authorization.
+    try {
+      await response.body?.cancel();
+    } catch {
+      // Best-effort cleanup only; validation above remains authoritative.
+    }
+  }
   const priceUsd = Number(BigInt(offer.amountBaseUnits)) / 1_000_000;
   const { decision, nextState } = evaluatePolicy({
     priceUsd,

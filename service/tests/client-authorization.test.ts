@@ -12,7 +12,7 @@ const config = (cap: number) => ({
   maxPerRequestUsd: cap, maxDailyUsd: 0.02,
   maxRequestsPerHour: 3, humanApprovalToken: "test-human",
 });
-function challenge(amount = "10000", payTo = RECIPIENT, network = DEVNET_CAIP2) {
+function challenge(amount = "10000", payTo = RECIPIENT, network: string = DEVNET_CAIP2) {
   return Buffer.from(JSON.stringify({
     x402Version: 2,
     accepts: [{

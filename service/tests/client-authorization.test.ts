@@ -85,13 +85,43 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     expect(signer).not.toHaveBeenCalled();
   });
 
+  test("a different localhost port is refused BEFORE reading challenge or calling signer", async () => {
+    const fetcher = vi.fn(async () => new Response(null,{status:402,headers:{"payment-required":challenge()}}));
+    const signer = vi.fn(async () => "SHOULD_NOT_SIGN");
+    await expect(authorizeBeforeSigner({
+      resourceUrl: "http://127.0.0.1:3002/api/merchant/inventory",
+      approvedResourceUrl: url, fetcher,
+      expectedRecipient: RECIPIENT, approvalToken: "test-human",
+      config: config(0.01), state: createPolicyState(), signer,
+    })).rejects.toHaveProperty("message","Resource URL differs from human-approved local target");
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(signer).not.toHaveBeenCalled();
+  });
+
+  test("a successful unpaid GET without HTTP 402 cannot authorize a signer", async () => {
+    const signer=vi.fn(async () => "SHOULD_NOT_SIGN");
+    await expect(authorizeBeforeSigner({
+      resourceUrl:url, approvedResourceUrl:url,
+      fetcher:async()=>new Response(null,{status:200}),
+      expectedRecipient:RECIPIENT,approvalToken:"test-human",
+      config:config(0.01),state:createPolicyState(),signer,
+    })).rejects.toHaveProperty("message","Expected HTTP 402 from approved local resource");
+    expect(signer).not.toHaveBeenCalled();
+  });
+
   test("approved path invokes injected MOCK signer once with validated 0.01 quote", async () => {
+    const strictTransport: typeof fetch = async (target, options) => {
+      expect(String(target)).toBe(url);
+      expect(options?.method).toBe("GET");
+      expect(options?.redirect).toBe("error");
+      return new Response(null,{status:402,headers:{"payment-required":challenge()}});
+    };
     const signer = vi.fn(async (context: ValidatedSignContext) => ({
       simulated: true, network: context.offer.network, amount: context.offer.amountBaseUnits,
       endpoint: context.resourceUrl, frozen: Object.isFrozen(context) && Object.isFrozen(context.offer)
     }));
     const result = await authorizeBeforeSigner({
-      resourceUrl: url, approvedResourceUrl: url, fetcher: transport(challenge()),
+      resourceUrl: url, approvedResourceUrl: url, fetcher: strictTransport,
       expectedRecipient: RECIPIENT, approvalToken: "test-human",
       config: config(0.01), state: createPolicyState(), signer,
     });

@@ -72,12 +72,14 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
       expectedRecipient: RECIPIENT, approvalToken: "test-human",
       config: config(0.01), state: createPolicyState(), signer,
     };
-    for (const edits of [
-      { paymentRequired: challenge("10001") },
-      { paymentRequired: challenge("10000", "6PcRervPBL9TXi1Cu4zHG9f6Gd5Cro1b6x3t9ewFmtfR") },
-      { paymentRequired: challenge("10000", RECIPIENT, "solana:mainnet") },
-      { resourceUrl: "https://external.example/api/merchant/inventory" }
-    ]) await expect(authorizeBeforeSigner({ ...args, ...edits })).rejects.toThrow();
+    const invalidCases: { edits: Partial<typeof args>; message: string }[] = [
+      { edits: { paymentRequired: challenge("10001") }, message: "Payment exceeds 0.01 USDC ceiling" },
+      { edits: { paymentRequired: challenge("10000", "6PcRervPBL9TXi1Cu4zHG9f6Gd5Cro1b6x3t9ewFmtfR") }, message: "Payment recipient mismatch" },
+      { edits: { paymentRequired: challenge("10000", RECIPIENT, "solana:mainnet") }, message: "Payment requirement is not Solana devnet exact" },
+      { edits: { resourceUrl: "https://external.example/api/merchant/inventory" }, message: "Readiness can only query the local unpaid inventory endpoint" }
+    ];
+    for (const { edits, message } of invalidCases)
+      await expect(authorizeBeforeSigner({ ...args, ...edits })).rejects.toThrow(message);
     expect(signer).not.toHaveBeenCalled();
   });
 

@@ -39,7 +39,12 @@ for (const c of cases) {
   state.dailySpentUsd = c.daily;
   const result = await authorizeBeforeSigner({
     resourceUrl,
-    paymentRequired: challenge,
+    approvedResourceUrl: resourceUrl,
+    // Offline synthetic 402 response. No network call is performed by this demo.
+    fetcher: async (requested) => {
+      if (String(requested) !== resourceUrl) throw Error("Wrong local resource");
+      return new Response(null, { status:402, headers:{"payment-required":challenge} });
+    },
     expectedRecipient: recipient,
     approvalToken: c.token,
     config: {
@@ -60,4 +65,4 @@ for (const c of cases) {
     synthetic: true, integratedBoundary: true,
   }));
 }
-console.log("PASS: 3 x402 quotes denied before signer callback; no wallet or transaction.");
+console.log(JSON.stringify({type:"summary",pass:true,scenarios:cases.length,signerCalls,paymentAttempted:false,synthetic:true}));

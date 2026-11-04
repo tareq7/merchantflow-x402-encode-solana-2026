@@ -1,13 +1,14 @@
 import { describe, expect, test, vi } from "vitest";
 import request from "supertest";
 import { buildApp } from "../src/server.ts";
-import { authorizeBeforeSigner } from "../src/client-authorization.ts";
+import { authorizeBeforeSigner, type ValidatedSignContext } from "../src/client-authorization.ts";
 import { createPolicyState } from "../src/policy.ts";
 import { CIRCLE_DEVNET_USDC_MINT } from "../src/readiness.ts";
 import { DEVNET_CAIP2 } from "../src/config.ts";
 
 const RECIPIENT = "6b3pFThsK3VEKdRaGVmBqJJjU6rnV5uf3Z5R2BrDVf8x";
 const url = "http://127.0.0.1:3001/api/merchant/inventory";
+const transport = (header: string): typeof fetch => async () => new Response(null,{status:402,headers:{"payment-required":header}});
 const config = (cap: number) => ({
   maxPerRequestUsd: cap, maxDailyUsd: 0.02,
   maxRequestsPerHour: 3, humanApprovalToken: "test-human",
@@ -34,7 +35,8 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     expect(unpaid.body).not.toHaveProperty("items");
     const signer = vi.fn(async () => "NEVER-SIGNED");
     const outcome = await authorizeBeforeSigner({
-      resourceUrl: url, paymentRequired: unpaid.headers["payment-required"] ?? null,
+      resourceUrl: url, approvedResourceUrl: url,
+      fetcher: transport(unpaid.headers["payment-required"] ?? ""),
       expectedRecipient: RECIPIENT,
       approvalToken: "test-human", config: config(0.005),
       state: createPolicyState(), signer,
@@ -47,7 +49,7 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
   test("missing human authorization and daily cap both block before mock signer", async () => {
     const signer = vi.fn(async () => "NO-CALL");
     const without = await authorizeBeforeSigner({
-      resourceUrl: url, paymentRequired: challenge(),
+      resourceUrl: url, approvedResourceUrl: url, fetcher: transport(challenge()),
       expectedRecipient: RECIPIENT, config: config(0.01),
       state: createPolicyState(), signer,
     });
@@ -56,7 +58,7 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     const cappedState = createPolicyState();
     cappedState.dailySpentUsd = 0.02;
     const overDaily = await authorizeBeforeSigner({
-      resourceUrl: url, paymentRequired: challenge(),
+      resourceUrl: url, approvedResourceUrl: url, fetcher: transport(challenge()),
       expectedRecipient: RECIPIENT, approvalToken: "test-human",
       config: config(0.01), state: cappedState, signer,
     });
@@ -68,25 +70,58 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
   test("wrong network, payee, oversized quote and remote URL never invoke signer", async () => {
     const signer = vi.fn(async () => "NO-CALL");
     const args = {
-      resourceUrl: url, paymentRequired: challenge(),
+      resourceUrl: url, approvedResourceUrl: url, fetcher: transport(challenge()),
       expectedRecipient: RECIPIENT, approvalToken: "test-human",
       config: config(0.01), state: createPolicyState(), signer,
     };
-    for (const edits of [
-      { paymentRequired: challenge("10001") },
-      { paymentRequired: challenge("10000", "6PcRervPBL9TXi1Cu4zHG9f6Gd5Cro1b6x3t9ewFmtfR") },
-      { paymentRequired: challenge("10000", RECIPIENT, "solana:mainnet") },
-      { resourceUrl: "https://external.example/api/merchant/inventory" }
-    ]) await expect(authorizeBeforeSigner({ ...args, ...edits })).rejects.toThrow();
+    const invalidCases: { edits: Partial<typeof args>; message: string }[] = [
+      { edits: { fetcher: transport(challenge("10001")) }, message: "Payment exceeds 0.01 USDC ceiling" },
+      { edits: { fetcher: transport(challenge("10000", "6PcRervPBL9TXi1Cu4zHG9f6Gd5Cro1b6x3t9ewFmtfR")) }, message: "Payment recipient mismatch" },
+      { edits: { fetcher: transport(challenge("10000", RECIPIENT, "solana:mainnet")) }, message: "Payment requirement is not Solana devnet exact" },
+      { edits: { resourceUrl: "https://external.example/api/merchant/inventory" }, message: "Readiness can only query the local unpaid inventory endpoint" }
+    ];
+    for (const { edits, message } of invalidCases)
+      await expect(authorizeBeforeSigner({ ...args, ...edits })).rejects.toHaveProperty("message",message);
+    expect(signer).not.toHaveBeenCalled();
+  });
+
+  test("a different localhost port is refused BEFORE reading challenge or calling signer", async () => {
+    const fetcher = vi.fn(async () => new Response(null,{status:402,headers:{"payment-required":challenge()}}));
+    const signer = vi.fn(async () => "SHOULD_NOT_SIGN");
+    await expect(authorizeBeforeSigner({
+      resourceUrl: "http://127.0.0.1:3002/api/merchant/inventory",
+      approvedResourceUrl: url, fetcher,
+      expectedRecipient: RECIPIENT, approvalToken: "test-human",
+      config: config(0.01), state: createPolicyState(), signer,
+    })).rejects.toHaveProperty("message","Resource URL differs from human-approved local target");
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(signer).not.toHaveBeenCalled();
+  });
+
+  test("a successful unpaid GET without HTTP 402 cannot authorize a signer", async () => {
+    const signer=vi.fn(async () => "SHOULD_NOT_SIGN");
+    await expect(authorizeBeforeSigner({
+      resourceUrl:url, approvedResourceUrl:url,
+      fetcher:async()=>new Response(null,{status:200}),
+      expectedRecipient:RECIPIENT,approvalToken:"test-human",
+      config:config(0.01),state:createPolicyState(),signer,
+    })).rejects.toHaveProperty("message","Expected HTTP 402 from approved local resource");
     expect(signer).not.toHaveBeenCalled();
   });
 
   test("approved path invokes injected MOCK signer once with validated 0.01 quote", async () => {
-    const signer = vi.fn(async (offer) => ({
-      simulated: true, network: offer.network, amount: offer.amountBaseUnits
+    const strictTransport: typeof fetch = async (target, options) => {
+      expect(String(target)).toBe(url);
+      expect(options?.method).toBe("GET");
+      expect(options?.redirect).toBe("error");
+      return new Response(null,{status:402,headers:{"payment-required":challenge()}});
+    };
+    const signer = vi.fn(async (context: ValidatedSignContext) => ({
+      simulated: true, network: context.offer.network, amount: context.offer.amountBaseUnits,
+      endpoint: context.resourceUrl, frozen: Object.isFrozen(context) && Object.isFrozen(context.offer)
     }));
     const result = await authorizeBeforeSigner({
-      resourceUrl: url, paymentRequired: challenge(),
+      resourceUrl: url, approvedResourceUrl: url, fetcher: strictTransport,
       expectedRecipient: RECIPIENT, approvalToken: "test-human",
       config: config(0.01), state: createPolicyState(), signer,
     });
@@ -95,6 +130,13 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     if (result.status !== "signed") throw Error("unexpected denial");
     expect(result.value.simulated).toBe(true);
     expect(result.value.amount).toBe("10000");
+    expect(result.value.endpoint).toBe(url);
+    expect(result.value.frozen).toBe(true);
+    expect(Object.isFrozen(result.offer)).toBe(false);
+    result.offer.amountBaseUnits="99999"; // Public result remains mutable; signer copy stays frozen
+    expect(signer.mock.calls[0]![0].offer.amountBaseUnits).toBe("10000");
+    expect(result.value.amount).toBe("10000");
+    expect(signer.mock.calls[0]![0].resourceUrl).toBe(url);
     expect(result.nextState.dailySpentUsd).toBeCloseTo(0.01);
     // This is an injected MOCK callback, not a wallet and NOT a transaction.
   });

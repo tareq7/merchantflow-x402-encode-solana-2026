@@ -109,6 +109,32 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     expect(signer).not.toHaveBeenCalled();
   });
 
+  test("unpaid response body is cancelled for approved, non-402 and invalid-header paths", async () => {
+    for (const variant of ["accepted", "not402", "badHeader"]) {
+      let cancellations=0;
+      const fetcher: typeof fetch = async () => new Response(
+        new ReadableStream({cancel() { cancellations++; }}),
+        {status:variant==="not402"?200:402,
+         headers: variant==="badHeader"?{"payment-required":"garbage"}:{"payment-required":challenge()}}
+      );
+      const signer=vi.fn(async () => "MOCK_ONLY");
+      const work=authorizeBeforeSigner({
+        resourceUrl:url,approvedResourceUrl:url,fetcher,
+        expectedRecipient:RECIPIENT,approvalToken:"test-human",
+        config:config(0.01),state:createPolicyState(),signer
+      });
+      if(variant==="accepted") {
+        const result=await work;
+        expect(result.status).toBe("signed");
+        expect(signer).toHaveBeenCalledTimes(1);
+      } else {
+        await expect(work).rejects.toThrow();
+        expect(signer).not.toHaveBeenCalled();
+      }
+      expect(cancellations).toBe(1);
+    }
+  });
+
   test("approved path invokes injected MOCK signer once with validated 0.01 quote", async () => {
     const strictTransport: typeof fetch = async (target, options) => {
       expect(String(target)).toBe(url);

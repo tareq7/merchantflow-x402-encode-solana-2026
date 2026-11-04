@@ -7,7 +7,7 @@
 **Video:** [2:43 MerchantFlow walkthrough](https://github.com/tareq7/merchantflow-x402-encode-solana-2026/releases/download/video-v4-2026-11-03/MerchantFlow_x402_ElevenLabs_v4_2026.mp4)  
 **Slides:** [Eight-slide presentation](https://github.com/tareq7/merchantflow-x402-encode-solana-2026/releases/download/video-v4-2026-11-03/MerchantFlow_x402_Encode_Final_Deck.pptx)
 
-MerchantFlow lets a commerce agent buy **one inventory answer** via x402 rather than subscribing to an entire data service. It is a sandbox demonstration with synthetic inventory. The x402 V2 Express middleware verifies payment before serving protected inventory. An independent human-controlled policy layer rejects requests outside the approved budget **before any wallet signing**. No production merchant or customer data is involved.
+MerchantFlow lets a commerce agent buy **one inventory answer** via x402 rather than subscribing to an entire data service. It is a sandbox demonstration with synthetic inventory. The x402 V2 Express middleware verifies payment before serving protected inventory. A separately callable **client-side** budget gate now validates an x402 offer and rejects excess spend **before invoking its injected signer callback**. Its tests include an actual SDK-generated 402 challenge. **The hosted resource server does not enforce client-side budgets**, and this code has not been proven with a live wallet signer. No production merchant or customer data is involved.
 
 ## Evidence to examine, in order
 
@@ -15,7 +15,7 @@ MerchantFlow lets a commerce agent buy **one inventory answer** via x402 rather 
 |---|---|---|
 | Live unpaid paywall | `curl -i https://merchantflow-x402-solana-devnet-demo.onrender.com/api/merchant/inventory` | Hosted public endpoint returned **HTTP 402**, V2 `PAYMENT-REQUIRED`, no inventory. Recheck its current availability; the free host may wake from sleep. |
 | Live configuration | [`/health`](https://merchantflow-x402-solana-devnet-demo.onrender.com/health), [`/api/docs/x402`](https://merchantflow-x402-solana-devnet-demo.onrender.com/api/docs/x402) | Public service exposes network, scheme, price and current limitations. |
-| Over-budget refusal *before signing* | `cd service && npm ci && npm run demo:budget-denial` | Deterministic **dry run** invokes the real policy module, rejects a `$0.02` quote against `$0.01` cap; also rejects missing human approval and a daily cap overrun. Never loads wallet/secret or submits payment. CI runs this command. |
+| Over-budget refusal *before signing* | `cd service && npm ci && npm run demo:budget-denial` | Deterministic **dry run** passes a valid `$0.01` Devnet x402 quote through `authorizeBeforeSigner`, refuses it against a lower **`$0.005` per-request cap**, and also rejects missing human approval and a daily-cap overrun. Its injected signer stub is never called. No wallet/secret/payment. CI runs this command. A separate CI test uses a real SDK-generated unpaid 402 header. |
 | Successful signed payment and delivery | See [original run evidence](REAL_X402_V2_STATUS.md) | A **single** human-approved transaction on Nov 2: actual localhost `402 → PAYMENT-SIGNATURE → 200 + inventory + PAYMENT-RESPONSE`, **not** a second demo payment. |
 | Verifiable real settlement | [Devnet Solana Explorer](https://explorer.solana.com/tx/Gj8WB6fGmb3QQya3egcQBNDdMK2L6efhDL8cLukMXZc5MdAAfwAdadfKKrSRXKju9FoT125QgYg4nqYn6TbzFvA?cluster=devnet) | **Finalized** `transferChecked` of exactly 10,000 micro-test-USDC, buyer −10,000, merchant +10,000, facilitator-sponsored fee. |
 | Independent chain proof | `node service/scripts/verify-devnet-x402-proof.mjs` (from repo root) | Read-only public RPC, pins transaction/mint/participants/amount/finality/balance changes. **No private key or new transfer.** |
@@ -31,9 +31,9 @@ npm ci
 npm run demo:budget-denial
 ```
 
-The output is machine-readable JSON, with three scenarios: `over_per_request_cap` (`denied_over_per_request`), `missing_human_approval` (`denied_no_approval`), and `over_daily_cap` (`denied_over_daily`). All three are required to report `allowed:false`, `signingAttempts:0`, `paymentAttempted:false`; otherwise the command fails.
+The output is machine-readable JSON, with three scenarios: `over_per_request_cap` (`denied_over_per_request`), `missing_human_approval` (`denied_no_approval`), and `over_daily_cap` (`denied_over_daily`). All three are required to report `allowed:false`, `signerCalls:0`, `paymentAttempted:false`; otherwise the command fails.
 
-**What this proves:** budget requests are blocked by the policy before the hypothetical signer is called, with no approval or token material leaving the process. **What it does not prove:** an actual payment was made by the script, production wallet-signing control, transactional accounting, or live hosted settlement. The signed, finalized Devnet transfer above is **separate evidence** for one successful request.
+**What this proves:** the optional `authorizeBeforeSigner` client boundary can validate a real-format Devnet x402 challenge, apply the policy, and stop a caller-supplied signer callback before signing. **What it does not prove:** that the deployed x402 server or every wallet client enforces budgets, that a real wallet was used, that a payment occurred, or that durable production accounting exists. The original human-approved transaction was executed separately. The signed, finalized Devnet transfer above is **separate evidence** for one successful request.
 
 ### Reproduce the live unpaid 402
 

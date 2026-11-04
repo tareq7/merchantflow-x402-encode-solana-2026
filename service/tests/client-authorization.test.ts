@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import request from "supertest";
 import { buildApp } from "../src/server.ts";
-import { authorizeBeforeSigner } from "../src/client-authorization.ts";
+import { authorizeBeforeSigner, type ValidatedSignContext } from "../src/client-authorization.ts";
 import { createPolicyState } from "../src/policy.ts";
 import { CIRCLE_DEVNET_USDC_MINT } from "../src/readiness.ts";
 import { DEVNET_CAIP2 } from "../src/config.ts";
@@ -82,8 +82,9 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
   });
 
   test("approved path invokes injected MOCK signer once with validated 0.01 quote", async () => {
-    const signer = vi.fn(async (offer) => ({
-      simulated: true, network: offer.network, amount: offer.amountBaseUnits
+    const signer = vi.fn(async (context: ValidatedSignContext) => ({
+      simulated: true, network: context.offer.network, amount: context.offer.amountBaseUnits,
+      endpoint: context.resourceUrl, frozen: Object.isFrozen(context) && Object.isFrozen(context.offer)
     }));
     const result = await authorizeBeforeSigner({
       resourceUrl: url, paymentRequired: challenge(),
@@ -95,6 +96,9 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     if (result.status !== "signed") throw Error("unexpected denial");
     expect(result.value.simulated).toBe(true);
     expect(result.value.amount).toBe("10000");
+    expect(result.value.endpoint).toBe(url);
+    expect(result.value.frozen).toBe(true);
+    expect(signer.mock.calls[0]![0].resourceUrl).toBe(url);
     expect(result.nextState.dailySpentUsd).toBeCloseTo(0.01);
     // This is an injected MOCK callback, not a wallet and NOT a transaction.
   });

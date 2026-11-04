@@ -117,7 +117,10 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
         {status:variant==="not402"?200:402,
          headers: variant==="badHeader"?{"payment-required":"garbage"}:{"payment-required":challenge()}}
       );
-      const signer=vi.fn(async () => "MOCK_ONLY");
+      const signer=vi.fn(async () => {
+        expect(cancellations).toBe(1); // cleanup MUST precede signing
+        return "MOCK_ONLY";
+      });
       const work=authorizeBeforeSigner({
         resourceUrl:url,approvedResourceUrl:url,fetcher,
         expectedRecipient:RECIPIENT,approvalToken:"test-human",
@@ -133,6 +136,43 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
       }
       expect(cancellations).toBe(1);
     }
+  });
+
+  test("cleanup stream errors never replace actual status rejection", async () => {
+    let attemptedCancellation=0;
+    const signer=vi.fn(async () => "NO_PAYMENT");
+    const rejectingFetcher: typeof fetch = async () => new Response(
+      new ReadableStream({
+        cancel() { attemptedCancellation++; throw Error("INJECTED_BROKEN_BODY"); }
+      }),{status:200}
+    );
+    await expect(authorizeBeforeSigner({
+      resourceUrl:url,approvedResourceUrl:url,fetcher:rejectingFetcher,
+      expectedRecipient:RECIPIENT,approvalToken:"test-human",
+      config:config(0.01),state:createPolicyState(),signer
+    })).rejects.toHaveProperty("message","Expected HTTP 402 from approved local resource");
+    expect(attemptedCancellation).toBe(1);
+    expect(signer).not.toHaveBeenCalled();
+  });
+
+  test("a broken unused 402 body does not invalidate a safe approved offer", async () => {
+    let cleanupAttempted=0;
+    const signer=vi.fn(async () => {
+      expect(cleanupAttempted).toBe(1);
+      return "MOCK_SIGNED_ONLY";
+    });
+    const rejectingFetcher: typeof fetch = async () => new Response(
+      new ReadableStream({
+        cancel() { cleanupAttempted++; throw Error("INJECTED_BROKEN_BODY"); }
+      }),{status:402,headers:{"payment-required":challenge()}}
+    );
+    const result=await authorizeBeforeSigner({
+      resourceUrl:url,approvedResourceUrl:url,fetcher:rejectingFetcher,
+      expectedRecipient:RECIPIENT,approvalToken:"test-human",
+      config:config(0.01),state:createPolicyState(),signer
+    });
+    expect(result.status).toBe("signed");
+    expect(signer).toHaveBeenCalledTimes(1);
   });
 
   test("approved path invokes injected MOCK signer once with validated 0.01 quote", async () => {

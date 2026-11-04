@@ -1,6 +1,6 @@
 # MerchantFlow x402 V2 — verified real Solana Devnet settlement
 
-**Verified:** November 2, 2026. **Network:** Solana Devnet (CAIP-2 `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`). **Scheme:** `exact`. **Amount:** 0.01 valueless test USDC. **Final hackathon submission:** not yet confirmed.
+**Verified:** November 2, 2026. **Network:** Solana Devnet (CAIP-2 `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`). **Scheme:** `exact`. **Amount:** 0.01 valueless test USDC. **Final hackathon submission:** confirmed November 3, 2026 (Encode Final Checkpoint 3/3 and organizer receipt); judging pending.
 
 This document replaces older pre-settlement notes. It distinguishes the real, finalized x402 transaction from local mocks and from capabilities that remain unproven.
 
@@ -89,6 +89,18 @@ NODE
 
 This second check is distinct from the dependency-free on-chain transaction verifier. Both must succeed before describing the pinned accounts as independently verified canonical ATAs. **Do not resend an already-settled payment or assume an arbitrary token account is the ATA.**
 
+## Show an over-budget request rejected before signing (no spending)
+
+The real `service/src/policy.ts` evaluates the proposed price against explicit human approval and per-request/daily/rate caps. From the repository root:
+
+```bash
+cd service
+npm ci
+npm run demo:budget-denial
+```
+
+The script feeds an encoded **$0.01 valid Devnet x402 quote** into the optional `authorizeBeforeSigner` boundary and denies it under a stricter **$0.005 client cap**; missing human approval and exceeded daily budget also fail. It asserts **zero invocations of the injected signer stub**. An additional test passes a genuine SDK-generated V2 HTTP 402 challenge through the same boundary. These tests use **synthetic approval and mock signers**; they load no wallet, do not send a payment request and create no Devnet transaction. CI runs both tests. This proves an *opt-in client-side* pre-signing guard can reject such requests. It is **not wired into the deployed resource server or all wallet clients**, has no durable multi-request accounting, and does not replace the real Nov 2 settlement proof.
+
 ## Reproduce the unpaid challenge
 
 ```bash
@@ -108,9 +120,9 @@ For an **independent paid test**, use your own explicitly authorized disposable 
 ## Limits, provenance, and submission status
 
 - **Not production-safe for side effects:** There is no durable consumed-payment ledger or atomic replay reservation. One successful settlement does *not* prove concurrent retry safety, exactly-once billing, refunds, or robust expiry/failure handling. This API returns **synthetic read-only inventory only**.
-- **Local service, public chain:** The resource server ran on localhost; there is no claim of a deployed public payment endpoint or judge-accessible authenticated UI.
+- **Local paid proof versus public hosted service:** The original paid HTTP 200 happened on localhost, with one real Devnet test-USDC settlement. A separate [publicly deployed Render service](https://merchantflow-x402-solana-devnet-demo.onrender.com/api/docs/x402) currently exposes an unpaid x402 V2 HTTP 402 and configuration/health. **A new hosted signed-payment HTTP 200 has not been verified**, and the public service is not a judge-accessible wallet GUI. Read [the judge evidence map](JUDGE_START_HERE.md).
 - **No real money:** These are Circle **Devnet test tokens**, not mainnet USDC or sponsor cash credits.
 - **Clear provenance:** The React dashboard and SellerPilot marketplace logic predate this Solana challenge and were imported from an earlier Meta SellerPilot hackathon. New event-period work is in `service/`: x402 V2 middleware, approval policy, Solana preflight, tests, and the genuine Devnet payment proof.
-- **Final submission unconfirmed:** A distinct 2–4-minute Solana/x402 demo, applicable licensing checks and actual organizer portal receipt remain outstanding. Do not treat this README or passing CI as a final hackathon entry.
+- **Final submission completed:** The original Encode Final Checkpoint 3/3 entry was submitted November 3 and the organizer emailed a receipt. The 2:43 event video and eight-slide deck are publicly hosted in the [event-specific release](https://github.com/tareq7/merchantflow-x402-encode-solana-2026/releases/tag/video-v4-2026-11-03). The ElevenLabs Free-plan voice carries a noncommercial licensing caveat and attribution; no commercial-use rights are asserted. The final entry is submitted; judging/award status is still unknown.
 
 The local/mock tests remain useful for regression; they are **not** relabeled as live settlement tests. The proof above is a separately executed real transaction, independently verifiable by the read-only script.

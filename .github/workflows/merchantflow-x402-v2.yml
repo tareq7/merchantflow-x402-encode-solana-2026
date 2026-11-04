@@ -24,6 +24,9 @@ jobs:
       - name: Run x402 V2 middleware and fail-closed tests
         working-directory: service
         run: npm test
+      - name: Demonstrate pre-signing over-budget refusal (dry run, no wallet)
+        working-directory: service
+        run: npm run demo:budget-denial
       - name: Build service
         working-directory: service
         run: npm run build

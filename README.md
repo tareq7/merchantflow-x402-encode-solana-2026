@@ -2,6 +2,8 @@
 
 I built MerchantFlow because I wanted an AI agent to pay for one inventory request instead of another subscription. I tested one payment of 0.01 test USDC on Solana devnet. It was confirmed, and the local API returned the inventory. The project is now submitted to Encode Club. This uses sample data and is not a production payment system.
 
+**Judges: [Start here — working demo, verified payment, budget refusal, and failures](docs/JUDGE_START_HERE.md).** The live hosted endpoint demonstrates an unpaid HTTP 402; the single human-approved paid HTTP 200 occurred locally and has a [finalized Solana Devnet Explorer transaction](https://explorer.solana.com/tx/Gj8WB6fGmb3QQya3egcQBNDdMK2L6efhDL8cLukMXZc5MdAAfwAdadfKKrSRXKju9FoT125QgYg4nqYn6TbzFvA?cluster=devnet). To see a **$0.01 valid x402 quote refused by a stricter $0.005 client-side cap before invoking an injected signer callback**, run `cd service && npm ci && npm run demo:budget-denial`. This is a dry run with no wallet; the public resource server does **not** enforce client spending limits. The [2:43 demo video](https://github.com/tareq7/merchantflow-x402-encode-solana-2026/releases/download/video-v4-2026-11-03/MerchantFlow_x402_ElevenLabs_v4_2026.mp4) and [eight-slide deck](https://github.com/tareq7/merchantflow-x402-encode-solana-2026/releases/download/video-v4-2026-11-03/MerchantFlow_x402_Encode_Final_Deck.pptx) are publicly linked.
+
 **Project:** MerchantFlow x402  
 **Event:** Encode Club Solana Hackathon 2026 — Best Use of x402 on Solana  
 **Status:** **Submitted to Encode Club on November 3, 2026, with one verified 0.01-test-USDC Solana Devnet settlement. Judging is pending.**  

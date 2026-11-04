@@ -132,6 +132,9 @@ describe("actual pre-signing client boundary (mock signer; NO payment)", () => {
     expect(result.value.amount).toBe("10000");
     expect(result.value.endpoint).toBe(url);
     expect(result.value.frozen).toBe(true);
+    expect(Object.isFrozen(result.offer)).toBe(false);
+    result.offer.amountBaseUnits="10000"; // Public result remains mutable; signer copy stays frozen
+    expect(result.value.amount).toBe("10000");
     expect(signer.mock.calls[0]![0].resourceUrl).toBe(url);
     expect(result.nextState.dailySpentUsd).toBeCloseTo(0.01);
     // This is an injected MOCK callback, not a wallet and NOT a transaction.

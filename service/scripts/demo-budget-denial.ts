@@ -39,7 +39,12 @@ for (const c of cases) {
   state.dailySpentUsd = c.daily;
   const result = await authorizeBeforeSigner({
     resourceUrl,
-    paymentRequired: challenge,
+    approvedResourceUrl: resourceUrl,
+    // Offline synthetic 402 response. No network call is performed by this demo.
+    fetcher: async (requested) => {
+      if (String(requested) !== resourceUrl) throw Error("Wrong local resource");
+      return new Response(null, { status:402, headers:{"payment-required":challenge} });
+    },
     expectedRecipient: recipient,
     approvalToken: c.token,
     config: {

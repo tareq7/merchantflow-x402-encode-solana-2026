@@ -49,9 +49,14 @@ export async function authorizeBeforeSigner<T>(input: {
     // exact recipient and <= 10,000 base units. Never authorize on failure.
     offer = parsePaymentRequired(response.headers.get("payment-required"), input.expectedRecipient);
   } finally {
-    // Only the 402 status/header are needed. Cancel any unread stream on all
-    // branches so repeated checks do not retain local HTTP connections.
-    await response.body?.cancel();
+    // Only the 402 status/header are needed; clean up unread response bodies.
+    // A failed cleanup must NOT replace the actual payment validation error.
+    // Never let a broken unused response stream determine authorization.
+    try {
+      await response.body?.cancel();
+    } catch {
+      // Best-effort cleanup only; validation above remains authoritative.
+    }
   }
   const priceUsd = Number(BigInt(offer.amountBaseUnits)) / 1_000_000;
   const { decision, nextState } = evaluatePolicy({

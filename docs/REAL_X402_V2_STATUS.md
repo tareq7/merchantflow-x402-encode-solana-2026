@@ -99,7 +99,7 @@ npm ci
 npm run demo:budget-denial
 ```
 
-The script prints three JSON denial decisions and fails unless **all remain denied with zero calls to its signer stub**. The `$0.02` request is refused under a `$0.01` cap before any signing; a missing approval and a daily-budget exceedance also fail closed. It uses **synthetic approval data**, loads no wallet, makes no HTTP payment request and does not create another Devnet transaction. CI executes this command. This is a demonstration of the *pre-signing policy*; it is not a claim that the deployed app uses persistent budget accounting, or a replacement for the real Nov 2 settlement proof.
+The script feeds an encoded **$0.01 valid Devnet x402 quote** into the optional `authorizeBeforeSigner` boundary and denies it under a stricter **$0.005 client cap**; missing human approval and exceeded daily budget also fail. It asserts **zero invocations of the injected signer stub**. An additional test passes a genuine SDK-generated V2 HTTP 402 challenge through the same boundary. These tests use **synthetic approval and mock signers**; they load no wallet, do not send a payment request and create no Devnet transaction. CI runs both tests. This proves an *opt-in client-side* pre-signing guard can reject such requests. It is **not wired into the deployed resource server or all wallet clients**, has no durable multi-request accounting, and does not replace the real Nov 2 settlement proof.
 
 ## Reproduce the unpaid challenge
 
